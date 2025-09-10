@@ -1,0 +1,134 @@
+<script setup>
+  import { ref } from 'vue'
+  // 引入scss样式
+  import '@/styles/variables.scss'
+  // 移动端菜单开关
+  const isMenuOpen = ref(true)
+
+  // 导航列表
+  const navLinks = [
+    {label: 'Video', path: '/Video'},
+    {label: 'Plugin', path: '/Plugin'},
+    {label: 'Cars', path: '/Cars'},
+    {label: 'Skins', path: '/Skins'},
+    {label: 'Tracks', path: '/Tracks'}
+  ]
+
+  // 预先加一个 to 字段（纯对象，无函数）
+  navLinks.forEach(l => (l.to = { name: l.name }))
+</script>
+
+<template>
+  <header class="rent-header">
+    <div class="rent-header__container">
+      <!-- logo -->
+      <div class="rent-header__brand">
+        <h1 class="rent-header__logo">ACStation</h1>
+      </div>
+
+      <!-- 导航栏nav -->
+      <nav class="rent-nav rent-nav--desktop">
+        <router-link v-for="link in navLinks"
+                     :key="link.name"
+                     :to="{ path: link.path }"
+                     class="rent-nav__link"
+                     active-class="rent-nav__link--active"
+                     >{{ link.label }}</router-link>
+      </nav>
+
+      <!-- 用户操作（登录/注册） -->
+      <div class="rent-header__user_action">
+        <button class="rent-btn rent-btn--SignIn">Sign In</button>
+        <button class="rent-btn rent-btn--SignUp">Sign Up</button>
+      </div>
+    </div>
+  </header>
+</template>
+
+<style scoped lang="scss">
+/* 通过 class 的值，定位到对应的标签，设置对应的CSS样式 */
+.rent-header {
+  /* 背景 */
+  background-color: var(--color-bg);
+  /* 地边框 */
+  border-bottom: 1px solid var(--color-border);
+  /* 阴影 */
+  box-shadow: var(--shadow-sm);
+
+  &__container {
+    max-width: 80rem;               /* 1280px */
+    margin: 0 auto;                 /* 水平居中 */
+    padding: 0 1rem;                /* 响应式左右留白 */
+    display: flex;
+    align-items: center;            /* 垂直居中 */
+    justify-content: space-between;
+    height: 4rem;                   /* 64px 高度 */
+  }
+
+  &__brand { flex-shrink: 0; }      /* LOGO 区域不压缩 */
+
+  &__logo  { font-size: 1.5rem; font-weight: 700; color: var(--color-primary); }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;                   /* 12px 间距 */
+  }
+}
+
+/* 导航 */
+.rent-nav {
+  &--desktop {                      /* 生成 .rent-nav--desktop */
+
+    display: flex;                  /* 始终可见，不再用 @media 隐藏 */
+    gap: 0.5rem;
+    overflow-x: auto;               /* 关键：超出时出现横向滚动条 */
+    white-space: nowrap;            /* 防止文字换行 */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;          /* Firefox 隐藏滚动条 */
+    &::-webkit-scrollbar {
+      display: none;                /* Chrome / Safari 隐藏滚动条 */
+    }
+  }
+
+  &__link {
+    font-size: 0.875rem;      /* 14px */
+    font-weight: 500;
+    color: var(--color-text-muted);
+    padding: 0.5rem 0.75rem;  /* 8px 12px */
+    border-radius: 0.375rem;  /* 6px 圆角 */
+    text-decoration: none;
+    transition: color 0.15s ease-in-out;
+
+    &:hover { color: var(--color-primary); }
+
+    &--active { color: var(--color-text); }   /* 当前路由高亮 */
+  }
+}
+
+/* 按钮 */
+.rent-btn {
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+
+  &--SignIn {            /* 幽灵按钮 */
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+
+    &:hover { color: var(--color-primary); }
+  }
+
+  &--SignUp {          /* 主按钮 */
+    color: #fff;
+    background-color: var(--color-primary);
+    border: none;
+
+    &:hover { background-color: var(--color-primary-hover); }
+  }
+}
+</style>

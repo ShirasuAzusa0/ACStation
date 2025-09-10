@@ -1,0 +1,24 @@
+/* 统一在 :root 层级声明全局变量，后续在任何地方都能通过vue(xxx)进行引用 */
+:root {
+  /* header颜色变量 */
+  /* logo文字颜色 */
+  --color-primary: #755B8A;
+  --color-primary-hover: #5A2A92;
+  /* 跳转文字按钮颜色（选中时） */
+  --color-text: #2E1A47;
+  /* 跳转文字按钮颜色（未选中时） */
+  --color-text-muted: #8B7AA2;
+  /* 背景颜色 */
+  --color-bg: #FDFBFF;
+  --color-border: #8B7AA2;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+
+  /* footer颜色变量 */
+  --footer-bg: #2E1A47;
+  --footer-border: #3f3f4f;
+  --footer-primary: #755b8a;
+  --footer-text: #ffffff;
+  --footer-text-muted: #a8a8b3;
+  --footer-px: clamp(0.75rem, 1vw, 1rem);   /* 随视口自适应 */
+}
