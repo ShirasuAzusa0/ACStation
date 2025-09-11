@@ -17,15 +17,33 @@ const router = createRouter({
             ]
         },
         {
-            path: "/header_test",
-            name: "header",
-            component: () => import('@/components/Header.vue'),
+            path: "/cars",
+            name: "cars",
+            component: () => import('@/views/SourcePage/CarsView.vue'),
             children: []
         },
         {
-            path: "/footer_test",
-            name: "footer",
-            component: () => import('@/components/Footer.vue'),
+            path: "/tracks",
+            name: "tracks",
+            component: () => import('@/views/SourcePage/TracksView.vue'),
+            children: []
+        },
+        {
+            path: "/skins",
+            name: "skins",
+            component: () => import('@/views/SourcePage/SkinsView.vue'),
+            children: []
+        },
+        {
+            path: "/plugins",
+            name: "plugins",
+            component: () => import('@/views/SourcePage/PluginView.vue'),
+            children: []
+        },
+        {
+            path: "/videos",
+            name: "videos",
+            component: () => import('@/views/SourcePage/VideoView.vue'),
             children: []
         }
     ]
