@@ -1,5 +1,8 @@
 <script setup>
+// 声明当前组件会接收到一个名为 nav_card 的 prop，类型必须为 Object，并且是必传的
   defineProps({ nav_card: { type: Object, required: true } })
+// 声明当前组件灰度外触发一个名为 click 的自定义事件
+  defineEmits(["click"])
 </script>
 
 <template>

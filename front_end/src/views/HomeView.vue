@@ -95,6 +95,7 @@
       <div class="nav_details__container">
         <h1 class="nav_details__title">Search your liked</h1>
         <div class="nav_details__grid">
+          <!-- 触发链接跳转 -->
           <NavCards v-for="nav in navs" :key="nav.id" :nav_card="nav" @click="$router.push(`/${nav.name}`)" />
         </div>
         <!-- 按钮 -->
@@ -144,11 +145,36 @@
 
     <!-- 介绍区 -->
     <section id="description_section" class="description">
-      <div class="newest__bg">
-        <div class="newest__image">
+      <div class="description__bg">
+        <div class="description__image">
           <el-image style="width: 100%; height: 100%;" fit="contain"
                     src="cardsBG.png"/>
         </div>
+      </div>
+      <!-- 左侧文本区域 -->
+      <div class="description__content">
+        <h2 class="">About Us</h2>
+        <h3>ACStation</h3>
+        <P>
+          欢迎来到ACStation！这是一个由 Shirasu_Azusa 独立开发的资源网站，
+          在这里你可以找到 Azusa Racing 团队（好吧目前只有 Y.Z.Ben 一人）自制的游戏插件、赛道和车辆mod以及各类涂装，
+          也可以观看 Azusa Racing 日常训练的车载录像
+        </P>
+        <h3>Azusa Racing</h3>
+        <p>
+          Azusa Racing 是由 Y.Z.Ben 于2025年7月14日组建的模拟赛车队，主要参加Hipole举办的各项模拟赛车赛事，
+          目前正在向TCR黄金联赛等更高级别的赛事进发
+        </p>
+        <h3>Y.Z.Ben</h3>
+        <p>
+          Azusa Racing 创始人，8个月模拟赛车新人，B站账号Sinkhorn，参赛用名Shirasu_Azusa
+        </p>
+      </div>
+      <!-- 左侧图片区 -->
+      <div class="description__dp">
+        <img class="description__website" src="" alt="website image" />
+        <img class="description__team" src="/DescriptionPhotos/DP2.png" alt="team image" />
+        <img class="description__leader" src="" alt="leader image" />
       </div>
       <!-- 按钮 -->
       <div class="btn">
