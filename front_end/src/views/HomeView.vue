@@ -115,31 +115,34 @@
                     src="cardsBG.png"/>
         </div>
       </div>
-      <!-- 轮播图 -->
-      <div class="newest__carousel">
-        <el-carousel class="custom-carousel" height="400px" interval="3000" type="card" v-if="displayNewest.length">
-          <el-carousel-item v-for="item in displayNewest" :key="item.id">
-            <div class="carousel__card">
-              <!-- 把图片包一层figure，用flex实现“图在上，字在下”，并把悬浮层只盖在图片上 -->
-              <!-- element plus的carousel等在渲染成HTML时，会生成额外的<div>包裹（container、track、item），即外层wrapper，这使CSS的 :hover在scoped下有时无法跨越wrapper正确匹配到内部的标签 -->
-              <!-- 用 @mouseenter / @mouseleave 直接给 <img> 加类，就绕过了 wrapper 的影响，CSS可以直接匹配 -->
-              <!-- 给 <img> 本身加/移除类，让 CSS 匹配直接作用在目标元素上 -->
-              <div class="carousel__figure">
-                <img class="carousel__img"
-                     :src="item.img" :alt="item.name"
-                     @mouseenter="$event.currentTarget.classList.add('hovered')"
-                     @mouseleave="$event.currentTarget.classList.remove('hovered')"
-                />
-                <!-- info不再常驻显示，改为hover显示 -->
-                <div class="carousel__overlay">
-                  <p>{{ item.info }}</p>
+      <div class="newest__container">
+        <h1 class="newest__title">What is new currently?</h1>
+        <!-- 轮播图 -->
+        <div class="newest__carousel">
+          <el-carousel class="custom-carousel" height="400px" interval="3000" type="card" v-if="displayNewest.length">
+            <el-carousel-item v-for="item in displayNewest" :key="item.id">
+              <div class="carousel__card">
+                <!-- 把图片包一层figure，用flex实现“图在上，字在下”，并把悬浮层只盖在图片上 -->
+                <!-- element plus的carousel等在渲染成HTML时，会生成额外的<div>包裹（container、track、item），即外层wrapper，这使CSS的 :hover在scoped下有时无法跨越wrapper正确匹配到内部的标签 -->
+                <!-- 用 @mouseenter / @mouseleave 直接给 <img> 加类，就绕过了 wrapper 的影响，CSS可以直接匹配 -->
+                <!-- 给 <img> 本身加/移除类，让 CSS 匹配直接作用在目标元素上 -->
+                <div class="carousel__figure">
+                  <img class="carousel__img"
+                       :src="item.img" :alt="item.name"
+                       @mouseenter="$event.currentTarget.classList.add('hovered')"
+                       @mouseleave="$event.currentTarget.classList.remove('hovered')"
+                  />
+                  <!-- info不再常驻显示，改为hover显示 -->
+                  <div class="carousel__overlay">
+                    <p>{{ item.info }}</p>
+                  </div>
                 </div>
+                <div class="carousel__name">{{ item.name }}</div>
               </div>
-              <div class="carousel__name">{{ item.name }}</div>
-            </div>
-          </el-carousel-item>
-        </el-carousel>
-        <p v-else>正在加载最新推荐内容......</p>
+            </el-carousel-item>
+          </el-carousel>
+          <p v-else>正在加载最新推荐内容......</p>
+        </div>
       </div>
     </section>
 
@@ -370,6 +373,14 @@
   align-items: center;
   justify-content: center;
 
+  &__container {
+    z-index: 1;
+    display: block;
+    width: 100%;
+    max-width: 80rem;
+    margin: 0 auto;
+  }
+
   &__bg {
     position: absolute;
     top: 0;
@@ -389,6 +400,14 @@
   &__image {
     width: 100%;
     height: 100%
+  }
+
+  &__title {
+    font-size: 2rem;
+    text-align: center;
+    z-index: 2;
+    color: #181818;
+    margin-bottom: 2rem;
   }
 
   &__carousel {

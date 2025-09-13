@@ -114,24 +114,31 @@
     .rent-footer__navItem4 {
       margin-bottom: 0.5rem;
     }
-/*
-    .rent-footer__navLink {
-      font-size: 0.875rem;
-      color: var(--footer-text-muted);
-      text-decoration: none;
-      transition: color 0.2s;
 
-      &:hover { color: var(--footer-primary); }
+    li {
+      margin-bottom: 0.5rem;
+
+      a {
+        font-size: 0.875rem;
+        color: var(--footer-text-muted);
+        text-decoration: none;
+        transition: color 0.25s ease;
+
+        &:hover {
+          color: var(--footer-primary); /* 鼠标悬停时，亮眼突出 */
+        }
+
+        &:active {
+          color: var(--footer-text); /* 点击瞬间，变为正文色 */
+        }
+      }
     }
-
- */
   }
 
-  &__copyright {
-    border-top: 1px solid var(--footer-border);
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    text-align: center;
+  &__copyRight {
+    h3 {
+      color: white;
+    }
     font-size: 0.875rem;
     color: var(--footer-text-muted);
   }

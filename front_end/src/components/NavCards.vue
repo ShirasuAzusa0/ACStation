@@ -30,7 +30,7 @@
   /* 明显的半透明边框 + 轻微内阴影，和模糊玻璃效果  */
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
   /* 模糊玻璃效果 */
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(25px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 0.5rem;
   padding: 1rem;
