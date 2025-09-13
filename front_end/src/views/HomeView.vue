@@ -154,30 +154,48 @@
       <!-- 介绍信息区 -->
       <div class="description__container">
         <div class="description__about">
-          <!-- 左侧文本区域 -->
-          <div class="description__content">
-            <h2>About Us</h2>
-            <h3>ACStation</h3>
-            <P>
-              欢迎来到ACStation！这是一个由 Shirasu_Azusa 独立开发的资源网站，
-              在这里你可以找到 Azusa Racing 团队（好吧目前只有 Y.Z.Ben 一人）自制的游戏插件、赛道和车辆mod以及各类涂装，
-              也可以观看 Azusa Racing 日常训练的车载录像
-            </P>
-            <h3>Azusa Racing</h3>
-            <p>
-              Azusa Racing 是由 Y.Z.Ben 于2025年7月14日组建的模拟赛车队，主要参加Hipole举办的各项模拟赛车赛事，
-              目前正在向TCR黄金联赛等更高级别的赛事进发
-            </p>
-            <h3>Y.Z.Ben</h3>
-            <p>
-              Azusa Racing 创始人，8个月模拟赛车新人，B站账号Sinkhorn，参赛用名Shirasu_Azusa
-            </p>
+          <h2 class="description__title">About Us</h2>
+
+          <!-- 介绍图文 part 1 -->
+          <div class="description__part1">
+            <div class="description__content">
+              <h3>ACStation</h3>
+              <P>
+                欢迎来到ACStation！这是一个由 Shirasu_Azusa 独立开发的资源网站，
+                在这里你可以找到 Azusa Racing 团队（好吧目前只有 Y.Z.Ben 一人）自制的游戏插件、赛道和车辆mod以及各类涂装，
+                也可以观看 Azusa Racing 日常训练的车载录像
+              </P>
+            </div>
+            <div class="description__dp">
+              <img class="description__website" src="/DescriptionPhotos/DP1.png" alt="website image" />
+            </div>
           </div>
-          <!-- 左侧图片区 -->
-          <div class="description__dp">
-            <img class="description__website" src="/DescriptionPhotos/DP1.png" alt="website image" />
-            <img class="description__team" src="/DescriptionPhotos/DP2.png" alt="team image" />
-            <img class="description__leader" src="/DescriptionPhotos/DP3.JPG" alt="leader image" />
+
+          <!-- 介绍图文 part 2 -->
+          <div class="description__part2">
+            <div class="description__content">
+              <h3>Azusa Racing</h3>
+              <p>
+                Azusa Racing 是由 Y.Z.Ben 于2025年7月14日组建的模拟赛车队，主要参加Hipole举办的各项模拟赛车赛事，
+                目前正在向TCR黄金联赛等更高级别的赛事进发
+              </p>
+            </div>
+            <div class="description__dp">
+              <img class="description__team" src="/DescriptionPhotos/DP2.png" alt="team image" />
+            </div>
+          </div>
+
+          <!-- 介绍图文 part 3 -->
+          <div class="description__part3">
+            <div class="description__content">
+              <h3>Y.Z.Ben</h3>
+              <p>
+                Azusa Racing 创始人，8个月模拟赛车新人，B站账号Sinkhorn，参赛用名Shirasu_Azusa
+              </p>
+            </div>
+            <div class="description__dp">
+              <img class="description__leader" src="/DescriptionPhotos/DP3.PNG" alt="leader image" />
+            </div>
           </div>
         </div>
 
@@ -580,17 +598,16 @@
 
   &__about {
     position: relative;
-    display: grid;
+    display: block;
     grid-template-columns: 1fr 420px; /* 左右两列 */
     /* 第一行为 About 标题，下面 3 行为对应文段/图片 */
     grid-template-rows: auto repeat(3, minmax(140px, auto));
     gap: 2rem;
     align-items: start; /* 顶部对齐 */
-    flex: 1;
     z-index: 1;
     justify-content: center;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: -40px;
     padding: 2rem;
     /* 明显的半透明渐变边框 + 轻微内阴影，和模糊玻璃效果  */
     background: linear-gradient(135deg, rgba(90,42,146,0.2), rgba(255,255,255,0.05));
@@ -599,26 +616,27 @@
     border-radius: 1rem;
   }
 
+  &__title {
+    transform: translateY(-24px);
+    margin-bottom: 1.25rem;
+    transition: transform 180ms ease;
+  }
+
+  &__part1, &__part2, &__part3 {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 1.25rem 2rem;
+    align-items: start;
+    margin-bottom: 1.5rem;
+  }
+
   &__content {
+    margin-top: -15px;
+    grid-column: 1;
+    align-self: start;
+    padding-right: 0.5rem;
     border-radius: 0.75rem;
     object-fit: cover;
-  }
-
-  &__content h2 {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-  }
-
-  &__content h3 {
-    font-size: 1.25rem;
-    margin: 1.5rem 0 0.5rem;
-  }
-
-  &__content p {
-    line-height: 1.6;
-    margin-bottom: 1rem;
-    color: #181818;
   }
 
   &__dp {
@@ -634,51 +652,6 @@
     border-radius: 0.75rem;
     object-fit: cover;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-
-  /* 文段和图片对齐布局微调 */
-  .description__about > h3:nth-of-type(1),
-  .description__about > p:nth-of-type(1) {
-    grid-column: 1;
-    grid-row: 2;
-    align-self: start;
-  }
-  .description__about > h3:nth-of-type(2),
-  .description__about > p:nth-of-type(2) {
-    grid-column: 1;
-    grid-row: 3;
-    align-self: start;
-  }
-  .description__about > h3:nth-of-type(3),
-  .description__about > p:nth-of-type(3) {
-    grid-column: 1;
-    grid-row: 4;
-    align-self: start;
-  }
-
-  .description__about > img:nth-of-type(1) {
-    grid-column: 2;
-    grid-row: 2;
-    justify-self: center;
-    align-self: center;
-    max-width: 100%;
-    height: auto;
-  }
-  .description__about > img:nth-of-type(2) {
-    grid-column: 2;
-    grid-row: 3;
-    justify-self: center;
-    align-self: center;
-    max-width: 100%;
-    height: auto;
-  }
-  .description__about > img:nth-of-type(3) {
-    grid-column: 2;
-    grid-row: 4;
-    justify-self: center;
-    align-self: center;
-    max-width: 100%;
-    height: auto;
   }
 
   .btn__container {
