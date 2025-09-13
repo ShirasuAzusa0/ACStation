@@ -1,21 +1,34 @@
 <script setup>
-  import { ref } from 'vue'
-  // 引入scss样式
-  import '@/styles/variables.scss'
-  // 移动端菜单开关
-  const isMenuOpen = ref(true)
+import { ref } from 'vue'
+// 不要把 useRouter, useRoute 错从 vue 中引入，这样是错误的会导致页面空白
+import { useRouter, useRoute } from 'vue-router'
+// 引入scss样式
+import '@/styles/variables.scss'
+// 移动端菜单开关
+const isMenuOpen = ref(true)
+const router = useRouter()
+const route = useRoute()
 
-  // 导航列表
-  const navLinks = [
-    {label: 'Video', path: '/Video'},
-    {label: 'Plugin', path: '/Plugin'},
-    {label: 'Cars', path: '/Cars'},
-    {label: 'Skins', path: '/Skins'},
-    {label: 'Tracks', path: '/Tracks'}
-  ]
+// 导航列表
+const navLinks = [
+  {label: 'Videos', path: '/Videos'},
+  {label: 'Plugins', path: '/Plugins'},
+  {label: 'Cars', path: '/Cars'},
+  {label: 'Skins', path: '/Skins'},
+  {label: 'Tracks', path: '/Tracks'}
+]
 
-  // 预先加一个 to 字段（纯对象，无函数）
-  navLinks.forEach(l => (l.to = { name: l.name }))
+// 预先加一个 to 字段（纯对象，无函数）
+navLinks.forEach(l => (l.to = { name: l.name }))
+
+function goHome() {
+  if (route.path == "/Home") {
+    window.location.reload()
+  }
+  else {
+    router.push("/home")
+  }
+}
 </script>
 
 <template>
@@ -23,7 +36,7 @@
     <div class="rent-header__container">
       <!-- logo -->
       <div class="rent-header__brand">
-        <h1 class="rent-header__logo">ACStation</h1>
+        <h1 class="rent-header__logo" @click="goHome">ACStation</h1>
       </div>
 
       <!-- 导航栏nav -->
@@ -33,7 +46,7 @@
                      :to="{ path: link.path }"
                      class="rent-nav__link"
                      active-class="rent-nav__link--active"
-                     >{{ link.label }}</router-link>
+        >{{ link.label }}</router-link>
       </nav>
 
       <!-- 用户操作（登录/注册） -->
