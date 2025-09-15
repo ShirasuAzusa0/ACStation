@@ -5,20 +5,33 @@ const router = createRouter({
     routes:[
         {
             path: "/",
-            redirect: "/home"
+            redirect: "/Home"
         },
         {
             // 引用组件，path为路径（"/"表示首页），name组件名，component是组件引用
             path: "/Home",
             name: "home",
-            component: () => import('@/views/HomeView.vue'),
+            component: () => import('@/views/HomeView.vue')
+        },
+        {
+            path: "/Welcome",
+            name: "welcome",
+            component: () => import('@/views/welcome/WelcomeView.vue'),
             children : [
                 {
                     // 子路由的 path 如果以 / 开头，就会被当成根路径，不再拼接父路由的路径
                     // <router-view/> 一旦没有匹配到任何子路由，父路由页面就会变成空白的
-                    path: "login",
-                    name: "home-login",
-                    component: () => import('@/views/welcome/LoginPage.vue')
+
+                    // 登录子页面
+                    path: "Sign-In",
+                    name: "home-SignIn",
+                    component: () => import('@/views/welcome/LogInView.vue')
+                },
+                {
+                    // 注册子页面
+                    path: "Sign-Up",
+                    name: "home-SignUp",
+                    component: () => import('@/views/welcome/SignUpView.vue')
                 }
             ]
         },

@@ -26,8 +26,16 @@ function goHome() {
     window.location.reload()
   }
   else {
-    router.push("/home")
+    router.push("/Home")
   }
+}
+
+function SignUp() {
+  router.push("/Welcome/Sign-Up")
+}
+
+function SignIn() {
+  router.push("/Welcome/Sign-In")
 }
 </script>
 
@@ -51,8 +59,8 @@ function goHome() {
 
       <!-- 用户操作（登录/注册） -->
       <div class="rent-header__user_action">
-        <button class="rent-btn rent-btn--SignIn">Sign In</button>
-        <button class="rent-btn rent-btn--SignUp">Sign Up</button>
+        <button class="rent-btn rent-btn--SignIn" @click="SignIn">Sign In</button>
+        <button class="rent-btn rent-btn--SignUp" @click="SignUp">Sign Up</button>
       </div>
     </div>
   </header>

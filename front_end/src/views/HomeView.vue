@@ -2,6 +2,8 @@
   import { ref, computed, onMounted } from "vue";
   import axios from "axios";
   import NavCards from '@/components/NavCards.vue'
+  import Header from "@/components/Header.vue";
+  import Footer from "@/components/Footer.vue";
 
   const navs = [
     {id: 1, name: "Video", info: "Get faster in your hot lap", img: "/CardOutLook/VideoOutLook.jpg"},
@@ -61,6 +63,7 @@
 </script>
 
 <template>
+  <Header />
   <main class="home">
     <!-- 核心区（hero区） -->
     <section class="hero">
@@ -211,6 +214,7 @@
       </div>
     </section>
   </main>
+  <Footer />
 </template>
 
 <style scoped lang="scss">

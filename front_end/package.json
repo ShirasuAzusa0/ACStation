@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.11.0",
     "element-plus": "^2.10.4",
     "unplugin-auto-import": "^19.3.0",
