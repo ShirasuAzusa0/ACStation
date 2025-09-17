@@ -77,12 +77,14 @@
       font-weight: bold;
       margin: 0 0 10px 0;
       text-shadow: 0 0 10px black;
+      transform: translate(1%, 0);
     }
 
     &__desc {
       font-size: 16px;
       margin: 0;
       text-shadow: 0 0 10px black;
+      transform: translate(1%, 0);
     }
 
     &__LogIn {

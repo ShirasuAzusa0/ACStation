@@ -59,6 +59,8 @@ const refreshCaptcha = () => {
     width: 100%;
     height: 100%;
     z-index: 2;
+    /* 可选：加个黑色边框 */
+    border: 1px solid #181818;
     /* 明显的半透明渐变边框 + 轻微内阴影，和模糊玻璃效果  */
     background: linear-gradient(135deg, rgba(90,42,146,0.2), rgba(255,255,255,0.05));
     backdrop-filter: blur(15px);

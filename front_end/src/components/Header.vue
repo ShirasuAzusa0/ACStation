@@ -44,7 +44,8 @@ function SignIn() {
     <div class="rent-header__container">
       <!-- logo -->
       <div class="rent-header__brand">
-        <h1 class="rent-header__logo" @click="goHome">ACStation</h1>
+        <!--<h1 class="rent-header__logo" @click="goHome">ACStation</h1>-->
+        <img src="../components/icons/Logo.png" alt="Logo" class="rent-header__logo" @click="goHome" />
       </div>
 
       <!-- 导航栏nav -->
@@ -88,7 +89,7 @@ function SignIn() {
 
   &__brand { flex-shrink: 0; }      /* LOGO 区域不压缩 */
 
-  &__logo  { font-size: 1.5rem; font-weight: 700; color: var(--color-primary); }
+  &__logo  { width: 150px; cursor: pointer }
 
   &__actions {
     display: flex;
