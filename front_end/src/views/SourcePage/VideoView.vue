@@ -14,7 +14,6 @@ const form = reactive({
 // 分类数据
 const categories = ref([])
 const categoriesLoading = ref(true)
-//
 
 // 视频数据
 const videos = ref([])
@@ -61,7 +60,7 @@ const fetchCategories = async () => {
       ]
     } else {
       // 🟢 生产环境：调用后端
-      const res = await axios.get("/api/categories")
+      const res = await axios.get("/api/video/categories")
       categories.value = res.data
     }
   } catch (err) {
@@ -161,8 +160,7 @@ onMounted(() => {
                       type="button"
                       class="category-chip"
                       :class="{ active: form.categoryId === cat.id }"
-                      @click="selectCatag(cat)"
-                  >
+                      @click="selectCatag(cat)">
                     <el-icon><VideoCamera /></el-icon>
                     <span class="cat-name">{{ cat.name }}</span>
                   </button>
@@ -453,6 +451,9 @@ onMounted(() => {
     background-color: #7e57c2;
     color: #fff;
   }
+}
+:deep(.el-select__wrapper.is-focused) {
+  box-shadow: 0 0 0 1px #7e57c2 !important;
 }
 
 /* 自定义输入框选中效果 */
