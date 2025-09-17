@@ -14,6 +14,7 @@ const form = reactive({
 // 分类数据
 const categories = ref([])
 const categoriesLoading = ref(true)
+//
 
 // 视频数据
 const videos = ref([])
@@ -37,11 +38,12 @@ const clearCategory = () => {
   fetchVideos()
 }
 
-// 搜索
+// 回车进行搜索
 const onSearchEnter = () => {
   fetchVideos()
 }
 
+// 点search按钮进行搜索
 const onSubmitForm = () => {
   fetchVideos()
 }
@@ -272,6 +274,7 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    animation: fadeInLeft 0.3s ease-out 0.3s both;
   }
 
   &__desc {
@@ -346,6 +349,7 @@ onMounted(() => {
   padding: 20px 40px;
   background: #fff;
   border-bottom: 1px solid #eee;
+  animation: fadeInTop 0.5s ease-out 0.5s both;
 
   &__inner {
     display: flex;
@@ -359,6 +363,7 @@ onMounted(() => {
   flex: 1;
   padding: 20px 40px;
   background: #fafafa;
+  animation: fadeInBottom 0.5s ease-out 0.5s both;
 
   &__inner {
     display: flex;
@@ -464,16 +469,28 @@ onMounted(() => {
   color: #fff !important;
 }
 
-  /* 响应式：小屏幕时改为上下布局 */
-  @media (max-width: 1024px) {
-    .Video__container {
-      flex-direction: column;
-    }
-
-    .setting {
-      width: 100%;
-      border-left: none;
-      border-top: 1px solid #ddd;
-    }
+/* 响应式：小屏幕时改为上下布局 */
+@media (max-width: 1024px) {
+  .Video__container {
+    flex-direction: column;
   }
+
+  .setting {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #ddd;
+  }
+}
+@keyframes fadeInLeft {
+  0%   { opacity: 0; transform: translate(0, 0) translateX(-0.5rem); }
+  100% { opacity: 1; transform: translate(0, 0) translateX(0); }
+}
+@keyframes fadeInTop {
+  0%   { opacity: 0; transform: translate(0, 0) translateY(-0.5rem); }
+  100% { opacity: 1; transform: translate(0, 0) translateY(0); }
+}
+@keyframes fadeInBottom {
+  0%   { opacity: 0; transform: translate(0, 0) translateY(0.5rem); }
+  100% { opacity: 1; transform: translate(0, 0) translateY(0); }
+}
 </style>
