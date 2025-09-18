@@ -4,10 +4,13 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 // 引入scss样式
 import '@/styles/variables.scss'
+import {useUserStore} from "@/stores/user.js";
 // 移动端菜单开关
 const isMenuOpen = ref(true)
 const router = useRouter()
 const route = useRoute()
+
+const userStore = useUserStore()
 
 // 导航列表
 const navLinks = [
@@ -37,6 +40,10 @@ function SignUp() {
 function SignIn() {
   router.push("/Welcome/Sign-In")
 }
+
+function LogOut() {
+  userStore.logout()
+}
 </script>
 
 <template>
@@ -60,8 +67,15 @@ function SignIn() {
 
       <!-- 用户操作（登录/注册） -->
       <div class="rent-header__user_action">
-        <button class="rent-btn rent-btn--SignIn" @click="SignIn">Sign In</button>
-        <button class="rent-btn rent-btn--SignUp" @click="SignUp">Sign Up</button>
+        <template v-if="userStore.user">
+          <img :src="userStore.user.avatar" alt="avatar" class="user-avatar" />
+          <span class="user-name">{{ userStore.user.name }}</span>
+          <button class="rent-btn rent-btn--SignIn" @click="logout">Logout</button>
+        </template>
+        <template v-else>
+          <button class="rent-btn rent-btn--SignIn" @click="SignUp">Sign Up</button>
+          <button class="rent-btn rent-btn--SignUp" @click="SignIn">Sign In</button>
+        </template>
       </div>
     </div>
   </header>
@@ -152,5 +166,17 @@ function SignIn() {
 
     &:hover { background-color: var(--color-primary-hover); }
   }
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.user-name {
+  margin: 0 8px;
+  font-weight: 500;
+  color: var(--color-text);
 }
 </style>

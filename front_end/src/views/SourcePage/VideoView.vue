@@ -2,7 +2,7 @@
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
 import { ref, reactive, onMounted } from "vue";
-import { VideoCamera } from "@element-plus/icons-vue";
+import {VideoPlay, VideoPause, FolderOpened, Folder} from "@element-plus/icons-vue";
 import axios from "axios";
 
 // 表单状态（排序规则、分类tag）
@@ -148,7 +148,10 @@ onMounted(() => {
                     class="category-chip"
                     :class="{ active: form.categoryId === null }"
                     @click="clearCategory">
-                  <el-icon><VideoCamera /></el-icon>
+                  <el-icon>
+                    <video-pause v-if="form.categoryId === null" />
+                    <video-play v-else />
+                  </el-icon>
                   全部</button>
                 <template v-if="categoriesLoading">
                   <span class="cat-loading">Azusa正在翻箱倒柜中...</span>
@@ -161,7 +164,10 @@ onMounted(() => {
                       class="category-chip"
                       :class="{ active: form.categoryId === cat.id }"
                       @click="selectCatag(cat)">
-                    <el-icon><VideoCamera /></el-icon>
+                    <el-icon>
+                      <video-pause v-if="form.categoryId === cat.id" />
+                      <video-play v-else />
+                    </el-icon>
                     <span class="cat-name">{{ cat.name }}</span>
                   </button>
                 </template>

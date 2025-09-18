@@ -6,8 +6,8 @@
   import Footer from "@/components/Footer.vue";
 
   const navs = [
-    {id: 1, name: "Video", info: "Get faster in your hot lap", img: "/CardOutLook/VideoOutLook.jpg"},
-    {id: 2, name: "Plugin", info: "Your good practice partner", img: "/CardOutLook/PluginOutLook.png"},
+    {id: 1, name: "Videos", info: "Get faster in your hot lap", img: "/CardOutLook/VideoOutLook.jpg"},
+    {id: 2, name: "Plugins", info: "Your good practice partner", img: "/CardOutLook/PluginOutLook.png"},
     {id: 3, name: "Cars", info: "I drive", img: "/CardOutLook/CarOutLook.jpg"},
     {id: 4, name: "Skins", info: "Pick up your favorable painted", img: "/CardOutLook/SkinOutLook.jpg"},
     {id: 5, name: "Tracks", info: "I race", img: "/CardOutLook/TrackOutLook.png"}

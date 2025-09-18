@@ -136,7 +136,7 @@ onMounted( () => {
                 <el-option label="默认" value="default"></el-option>
                 <el-option label="按时间最新排列" value="newest"></el-option>
                 <el-option label="按时间最早排列" value="oldest"></el-option>
-                <el-option label="按最多观看排列" value="most_popular"></el-option>
+                <el-option label="按最热门排列" value="most_popular"></el-option>
               </el-select>
               <label for="c">标签</label>
               <!-- 后端驱动的分类tag区 -->

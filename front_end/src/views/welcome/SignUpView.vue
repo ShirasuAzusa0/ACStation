@@ -1,12 +1,51 @@
 <script setup>
 import {User, Lock, Key} from '@element-plus/icons-vue'
 import { ref } from 'vue'
+import { useRouter } from "vue-router"
+import axios from "axios"
+import { useUserStore } from '@/stores/user'
 
+const username = ref('')
+const password = ref('')
+const captcha = ref('')
 // 模拟验证码图片 URL
 const captchaUrl = ref('/api/captcha?time' + Date.now())
 // 点击刷新验证码
 const refreshCaptcha = () => {
   captchaUrl.value = '/api/captcha?time' + Date.now()
+}
+
+const userStore = useUserStore()
+
+const router = useRouter()
+
+const SignUp = async () => {
+  try {
+    const res = await axios.post('/api/auth/register', {
+      username: username.value,
+      password: password.value,
+      captcha: captcha.value
+    })
+    // 假设后端返回 { token, user: { name, avatar } }
+    userStore.setUser(res.data.user, res.data.token)
+    router.push("/Home")
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const SignIn = async () => {
+  try {
+    const res = await axios.post('/api/auth/login', {
+      username: username.value,
+      password: password.value,
+      captcha: captcha.value
+    })
+    userStore.setUser(res.data.user, res.data.token)
+    router.push("/Home")
+  } catch (err) {
+    console.error(err)
+  }
 }
 </script>
 
@@ -18,18 +57,18 @@ const refreshCaptcha = () => {
       <p class="desc__dp2">————Kimi Raikkonen</p>
     </div>
     <div class="LogIn__table">
-      <el-input type="text" placeholder="用户名/邮箱">
+      <el-input v-model="username" placeholder="用户名/邮箱">
         <template #prefix>
           <el-icon><User /></el-icon>
         </template>
       </el-input>
-      <el-input type="password" style="margin-top: 10px" placeholder="密码">
+      <el-input v-model="password" type="password" style="margin-top: 10px" placeholder="密码" show-password>
         <template #prefix>
           <el-icon><Lock /></el-icon>
         </template>
       </el-input>
       <div class="LogIn__captcha">
-        <el-input class="captcha__input" placeholder="验证码">
+        <el-input v-model="captcha" class="captcha__input" placeholder="验证码">
           <template #prefix>
             <el-icon><Key /></el-icon>
           </template>
@@ -39,10 +78,10 @@ const refreshCaptcha = () => {
     </div>
     <div class="LogIn__buttons">
       <div class="LogIn__btn1">
-        <el-button style="width: 400px" class="btn__success" plain>立即登录</el-button>
+        <el-button style="width: 400px" class="btn__success" plain @click="SignUp">立即登录</el-button>
       </div>
       <div class="LogIn__btn2">
-        <el-button style="width: 400px" class="btn__warning" plain>没有账号？注册一个吧</el-button>
+        <el-button style="width: 400px" class="btn__warning" plain @click="SignIn">没有账号？注册一个吧</el-button>
       </div>
     </div>
   </div>
@@ -62,7 +101,7 @@ const refreshCaptcha = () => {
     /* 可选：加个黑色边框 */
     border: 1px solid #181818;
     /* 明显的半透明渐变边框 + 轻微内阴影，和模糊玻璃效果  */
-    background: linear-gradient(135deg, rgba(90,42,146,0.2), rgba(255,255,255,0.05));
+    background: linear-gradient(135deg, rgba(90,42,146,0.2), rgba(0,0,0,0.2));
     backdrop-filter: blur(15px);
     border-radius: 1rem;
     font-family: "Microsoft YaHei", sans-serif;
@@ -104,17 +143,31 @@ const refreshCaptcha = () => {
     margin-bottom: 25px;
 
     ::v-deep(.el-input__wrapper) {
-      background-color: rgba(90, 42, 146, 0.2);
+      background-color: rgba(90, 42, 146, 0.02);
       backdrop-filter: blur(2px);
       border-radius: 8px;
       border: 1px solid #181818;                /* 可选：加个黑色边框 */
       transition: background-color 0.3s ease;
     }
 
+    ::v-deep(.el-input__inner) {
+      position: relative;
+      z-index: 1;
+      color: #181818;
+    }
+
+    ::v-deep(.el-input__inner::placeholder) {
+      color: #3f3f4f;
+    }
+
+    :deep(.el-input__wrapper.is-focus) {
+      box-shadow: 0 0 0 1px #7e57c2 !important;
+    }
+
     ::v-deep(.el-button) {
       background-color: transparent;             /* 完全透明 */
       border: 1px solid #181818;                /* 可选：加个黑色边框 */
-      color: #fff;                             /* 按钮文字颜色 */
+      color: #666666;                          /* 按钮文字颜色 */
       transition: all 0.3s ease;
     }
 
@@ -141,10 +194,20 @@ const refreshCaptcha = () => {
     margin-top: 10px;
 
     ::v-deep(.el-input__wrapper) {
-      background-color: rgba(90, 42, 146, 0.2);
+      background-color: rgba(90, 42, 146, 0.02);
       backdrop-filter: blur(2px);
       border-radius: 8px;
       transition: background-color 0.3s ease;
+    }
+
+    ::v-deep(.el-input__inner) {
+      position: relative;
+      z-index: 1;
+      color: #181818;
+    }
+
+    ::v-deep(.el-input__inner::placeholder) {
+      color: #3f3f4f;
     }
 
     .captcha__input {

@@ -57,7 +57,7 @@
         position: absolute;
         inset: 0;
         /* 45% 黑色蒙层 → 淡化背景 */
-        background: rgba(0, 0, 0, 0.45);
+        background: rgba(255, 255, 255, 0.55);
         z-index: 1;
       }
     }
