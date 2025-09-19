@@ -2,7 +2,7 @@
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
 import { ref, reactive, onMounted } from "vue";
-import {VideoPlay, VideoPause, FolderOpened, Folder} from "@element-plus/icons-vue";
+import {VideoPlay, VideoPause} from "@element-plus/icons-vue";
 import axios from "axios";
 
 // 表单状态（排序规则、分类tag）

@@ -48,7 +48,7 @@
 
   onMounted(async () => {
     try {
-      const res = await axios.get("/api/newest-images")
+      const res = await axios.get("/api/newest")
       if (Array.isArray(res.data) && res.data.length > 0) {
         // 把后端返回的数组赋值
         newest.value = res.data
@@ -497,14 +497,14 @@
 }
 
 /* 覆盖 Element Plus 内部样式：使用深度选择器 ::v-deep */
-::v-deep .custom-carousel {
+:deep .custom-carousel {
   /* 给指示器留出空间，并允许箭头溢出显示 */
   overflow: visible !important;
   padding-bottom: 44px; /* 给底部指示器腾出空间（可调） */
 }
 
 /* 箭头：放到轮播两侧外部、更明显、更大 */
-::v-deep .custom-carousel .el-carousel__arrow {
+:deep .custom-carousel .el-carousel__arrow {
   width: 44px;
   height: 44px;
   line-height: 44px;
@@ -518,24 +518,24 @@
 }
 
 /* 鼠标悬停时更高亮 */
-::v-deep .custom-carousel .el-carousel__arrow:hover {
+:deep .custom-carousel .el-carousel__arrow:hover {
   background-color: rgba(0,0,0,0.85) !important;
 }
 
 /* 把箭头移到轮播外侧（左/右） */
-::v-deep .custom-carousel .el-carousel__arrow--left {
+:deep .custom-carousel .el-carousel__arrow--left {
   left: -320px !important;   /* 挪到左侧外面 */
 }
-::v-deep .custom-carousel .el-carousel__arrow--right {
+:deep .custom-carousel .el-carousel__arrow--right {
   right: -320px !important;  /* 挪到右侧外面 */
 }
 
 /* 指示器：下移到轮播外，且更醒目 */
-::v-deep .custom-carousel .el-carousel__indicators {
+:deep .custom-carousel .el-carousel__indicators {
   bottom: -5px !important;  /* 指示器整体下移 */
   z-index: 30;
 }
-::v-deep .custom-carousel .el-carousel__indicator button {
+:deep .custom-carousel .el-carousel__indicator button {
   width: 38px;
   height: 6px;
   border-radius: 4px;
@@ -544,7 +544,7 @@
   transition: background-color .2s ease, transform .18s ease;
   margin: 0 6px !important;
 }
-::v-deep .custom-carousel .el-carousel__indicator.is-active button {
+:deep .custom-carousel .el-carousel__indicator.is-active button {
   background-color: #5a2a92 !important; /* 你的主色高亮 */
   transform: scale(1.05);
 }
@@ -565,16 +565,16 @@
 }
 
 /* 确保箭头不会被轮播卡片遮盖（提高 z-index） */
-::v-deep .custom-carousel .el-carousel__arrow,
-::v-deep .custom-carousel .el-carousel__indicators {
+:deep .custom-carousel .el-carousel__arrow,
+:deep .custom-carousel .el-carousel__indicators {
   pointer-events: auto;
 }
 
 /* 可选：在移动端缩小箭头与指示器尺寸 */
 @media (max-width: 768px) {
-  ::v-deep .custom-carousel .el-carousel__arrow { width:36px; height:36px; left: -40px !important; right: -40px !important; font-size:16px !important; }
-  ::v-deep .custom-carousel .el-carousel__indicators { bottom: -26px !important; }
-  ::v-deep .custom-carousel .el-carousel__indicator button { margin: 0 4px !important; width: 28px; height: 5px; }
+  :deep .custom-carousel .el-carousel__arrow { width:36px; height:36px; left: -40px !important; right: -40px !important; font-size:16px !important; }
+  :deep .custom-carousel .el-carousel__indicators { bottom: -26px !important; }
+  :deep .custom-carousel .el-carousel__indicator button { margin: 0 4px !important; width: 28px; height: 5px; }
 }
 
 .description {

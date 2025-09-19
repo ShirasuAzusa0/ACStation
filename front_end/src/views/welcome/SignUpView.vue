@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import { useRouter } from "vue-router"
 import axios from "axios"
 import { useUserStore } from '@/stores/user'
+import {ElMessage} from "element-plus";
 
 const username = ref('')
 const password = ref('')
@@ -25,12 +26,17 @@ const SignUp = async () => {
       username: username.value,
       password: password.value,
       captcha: captcha.value
+    }, {
+      headers: {
+        "Content-Type": "application/json"
+      }
     })
     // 假设后端返回 { token, user: { name, avatar } }
     userStore.setUser(res.data.user, res.data.token)
-    router.push("/Home")
+    ElMessage.success("注册成功，欢迎你，" + res.data.user.name)
+    await router.push("/Home")
   } catch (err) {
-    console.error(err)
+    ElMessage.error(err.response?.data?.message || "注册失败")
   }
 }
 
@@ -40,11 +46,16 @@ const SignIn = async () => {
       username: username.value,
       password: password.value,
       captcha: captcha.value
+    }, {
+      headers: {
+        "Content-Type": "application/json"
+      }
     })
     userStore.setUser(res.data.user, res.data.token)
-    router.push("/Home")
+    ElMessage.success("登录成功，欢迎你，" + res.data.user.name)
+    await router.push("/Home")
   } catch (err) {
-    console.error(err)
+    ElMessage.error(err.response?.data?.message || "登录失败")
   }
 }
 </script>
