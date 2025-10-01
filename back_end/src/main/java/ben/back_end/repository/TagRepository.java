@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface TagRepository extends JpaRepository<Tags, Long> {
     @Query(value = """
-    SELECT t.tagId, t.tagName, t.video_id, t.skin_id, t.car_id, t.track_id, t.plugin_id
-    FROM tags t
-    INNER JOIN (
-        SELECT MIN(tagId) AS id FROM tags GROUP BY tagName
-    ) t2 ON t.tagId = t2.id
-""", nativeQuery = true)
-    List<Tags> findAll();
+    SELECT t.tagId, t.tagName, t.category
+                       FROM tags t
+                       INNER JOIN (
+                           SELECT MIN(tagId) AS id FROM tags WHERE category = :category GROUP BY tagName
+                       ) t2 ON t.tagId = t2.id
+    """, nativeQuery = true)
+    List<Tags> findAll(String category);
 }

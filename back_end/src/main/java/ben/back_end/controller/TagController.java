@@ -5,9 +5,7 @@ import ben.back_end.entity.vo.response.TagListElementVO;
 import ben.back_end.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -19,11 +17,12 @@ public class TagController {
     private TagService tagService;
 
     @GetMapping("/categories")
-    public ResponseEntity<?> getTagList() {
-        List<Tags> tagList = tagService.getAllTags();
+    public ResponseEntity<?> getTagList(@RequestParam String category) {
+        List<Tags> tagList = tagService.getAllTags(category);
 
         List<TagListElementVO> vos = tagList.stream()
                 .map(t -> new TagListElementVO(
+                        t.getTagId(),
                         t.getTagName()
                 )).toList();
 
@@ -31,7 +30,7 @@ public class TagController {
                 Map.of(
                         "status", "success",
                         "msg", "获取标签列表成功",
-                        "List", vos
+                        "tags", vos
                 )
         );
     }

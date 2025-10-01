@@ -5,13 +5,15 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-// 视频列表的视图层，仅返回概览信息
 @Data
 @AllArgsConstructor
-public class VideoListVO {
-    private String videoTitle;
-    private String videoAvatar;
+public class PluginListElementVO {
+    private int pluginId;
+    private String pluginName;
+    private String pluginAvatar;
     private String linkURL;
     private int views;
+    private int likes;
+    private int downloads;
     private LocalDateTime createdAt;
 }

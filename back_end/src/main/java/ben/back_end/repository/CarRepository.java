@@ -1,0 +1,55 @@
+package ben.back_end.repository;
+
+import ben.back_end.entity.Cars;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface CarRepository extends JpaRepository<Cars, Integer> {
+    Cars findById(int carId);
+
+    @Query(value = """
+            SELECT cars.*
+            FROM cars
+            JOIN tags ON cars.carId = tags.car_id
+            WHERE tags.tagName = :tag
+            AND (
+                    cars.carName REGEXP :regex
+                    OR cars.description REGEXP :regex
+                )
+            ORDER BY
+            CASE
+                WHEN :choice = 1 THEN cars.carId
+                WHEN :choice = 2 THEN cars.createdAt
+                WHEN :choice = 3 THEN cars.createdAt
+                WHEN :choice = 4 THEN cars.views
+            END
+            CASE
+                WHEN :choice = 3 THEN DESC
+                ELSE ASC
+            END
+        """, nativeQuery = true)
+    List<Cars> SearchCars(
+            @Param("tags") String tag,
+            @Param("regex") String regex,
+            @Param("choice") int choice
+    );
+
+    // 按Id顺序获取涂装列表
+    @Query(value = "SELECT cars.* FROM cars JOIN tags ON cars.carId = tags.car_id WHERE tagName = :tag ORDER BY cars.carId ASC", nativeQuery = true)
+    List<Cars> getCarsById(String tag);
+
+    // 按照发布时间顺序获取视频列表（顺序）
+    @Query(value = "SELECT cars.* FROM cars JOIN tags ON cars.carId = tags.car_id WHERE tagName = :tag ORDER BY cars.createdAt ASC", nativeQuery = true)
+    List<Cars> getCarsByNewest(String tag);
+
+    // 按照发布时间顺序获取视频列表（逆序）
+    @Query(value = "SELECT cars.* FROM cars JOIN tags ON cars.carId = tags.car_id WHERE tagName = :tag ORDER BY cars.createdAt DESC", nativeQuery = true)
+    List<Cars> getCarsByOldest(String tag);
+
+    // 按照观看数获取视频列表
+    @Query(value = "SELECT cars.* FROM cars JOIN tags ON cars.carId = tags.car_id WHERE tagName = :tag ORDER BY cars.views ASC", nativeQuery = true)
+    List<Cars> getCarsByPopular(String tag);
+}

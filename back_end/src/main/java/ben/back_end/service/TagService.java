@@ -12,7 +12,7 @@ public class TagService {
     @Autowired
     private TagRepository tagRepository;
 
-    public List<Tags> getAllTags() {
-        return tagRepository.findAll();
+    public List<Tags> getAllTags(String category) {
+        return tagRepository.findAll(category);
     }
 }

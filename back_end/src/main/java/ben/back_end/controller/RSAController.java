@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/key")
+@RequestMapping("/api")
 public class RSAController {
     @Resource
     private RSAKeyUtil rsaKeyUtil;
 
     // 若路径只有 RequestMapping 中的那一部分，则此处的请求类型 Mapping 不写 URL
-    @GetMapping
+    @GetMapping("/key")
     public ResponseEntity<?> getPublicKey() {
         String public_key = rsaKeyUtil.getPublicKeyBase64();
         return ResponseEntity.ok(

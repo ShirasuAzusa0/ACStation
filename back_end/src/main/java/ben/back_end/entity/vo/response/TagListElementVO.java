@@ -6,5 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class TagListElementVO {
+    private int tagId;
     private String tagName;
 }

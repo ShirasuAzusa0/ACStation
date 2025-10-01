@@ -7,9 +7,10 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class CarListVO {
-    private String carName;
-    private String carAvatar;
+public class SkinListElementVO {
+    private int skinId;
+    private String skinName;
+    private String skinAvatar;
     private String linkURL;
     private int views;
     private int likes;

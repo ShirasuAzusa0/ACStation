@@ -47,6 +47,11 @@ public class Videos {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Getter
+    @Setter
+    @Column(name = "BVid", nullable = false)
+    private String BVid;
+
     @ManyToMany
     @JoinTable(
             name = "tag-relationships",
