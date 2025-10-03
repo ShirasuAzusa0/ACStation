@@ -33,4 +33,5 @@ build/
 .vscode/
 
 ### RSA key ###
+/src/main/java/ben/back_end/key/
 *.pem
