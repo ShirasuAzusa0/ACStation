@@ -38,18 +38,58 @@ public interface TrackRepository extends JpaRepository<Tracks, Integer> {
     );
 
     // 按Id顺序获取涂装列表
-    @Query(value = "SELECT tracks.* FROM tracks JOIN tags ON tracks.trackId = tags.track_id WHERE tagName = :tag ORDER BY tracks.trackId ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT tracks.*
+        FROM tracks
+        JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND tracks.trackId != 0
+        ORDER BY tracks.trackId ASC;
+        """, nativeQuery = true)
     List<Tracks> getTracksById(String tag);
 
     // 按照发布时间顺序获取视频列表（顺序）
-    @Query(value = "SELECT tracks.* FROM tracks JOIN tags ON tracks.trackId = tags.track_id WHERE tagName = :tag ORDER BY tracks.createdAt ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT tracks.*
+        FROM tracks
+        JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND tracks.trackId != 0
+        ORDER BY tracks.createdAt ASC;
+        """, nativeQuery = true)
     List<Tracks> getTracksByNewest(String tag);
 
     // 按照发布时间顺序获取视频列表（逆序）
-    @Query(value = "SELECT tracks.* FROM tracks JOIN tags ON tracks.trackId = tags.track_id WHERE tagName = :tag ORDER BY tracks.createdAt DESC", nativeQuery = true)
+    @Query(value = """
+        SELECT tracks.*
+        FROM tracks
+        JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND tracks.trackId != 0
+        ORDER BY tracks.createdAt DESC;
+        """, nativeQuery = true)
     List<Tracks> getTracksByOldest(String tag);
 
     // 按照观看数获取视频列表
-    @Query(value = "SELECT tracks.* FROM tracks JOIN tags ON tracks.trackId = tags.track_id WHERE tagName = :tag ORDER BY tracks.views ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT tracks.*
+        FROM tracks
+        JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND tracks.trackId != 0
+        ORDER BY tracks.views DESC;
+        """, nativeQuery = true)
     List<Tracks> getTracksByPopular(String tag);
+
+    // 获取最新赛道MOD
+    @Query(value = """
+        SELECT tracks.*
+        FROM tracks
+        ORDER BY tracks.createdAt DESC LIMIT 1;
+        """, nativeQuery = true)
+    Tracks findNewestTracks();
 }

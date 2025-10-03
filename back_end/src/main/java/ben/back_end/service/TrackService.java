@@ -32,4 +32,9 @@ public class TrackService {
             default -> null;
         };
     }
+
+    // 获取所有赛道MOD
+    public Tracks getNewestTracks() {
+        return trackRepository.findNewestTracks();
+    }
 }

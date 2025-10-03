@@ -59,7 +59,7 @@ public class Plugins {
 
     @ManyToMany
     @JoinTable(
-            name = "tag-relationships",
+            name = "tag_relationships",
             joinColumns = @JoinColumn(name = "plugin_id", referencedColumnName = "pluginId"),
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "tagId")
     )

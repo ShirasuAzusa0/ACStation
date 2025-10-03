@@ -32,4 +32,9 @@ public class PluginService {
             default -> null;
         };
     }
+
+    // 获取所有插件
+    public Plugins getNewestPlugins() {
+        return pluginRepository.findNewestPlugins();
+    }
 }

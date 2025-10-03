@@ -20,7 +20,7 @@ public class Cars {
     @Getter
     @Setter
     @Column(name = "carModName", nullable = false, unique = true)
-    private String carName;
+    private String carModName;
 
     @Getter
     @Setter
@@ -59,7 +59,7 @@ public class Cars {
 
     @ManyToMany
     @JoinTable(
-            name = "tag-relationships",
+            name = "tag_relationships",
             joinColumns = @JoinColumn(name = "car_id", referencedColumnName = "carId"),
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "tagId")
     )

@@ -59,7 +59,7 @@ public class Skins {
 
     @ManyToMany
     @JoinTable(
-            name = "tag-relationships",
+            name = "tag_relationships",
             joinColumns = @JoinColumn(name = "skin_id", referencedColumnName = "skinId"),
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "tagId")
     )

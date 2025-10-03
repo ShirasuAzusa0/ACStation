@@ -26,7 +26,9 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)                              // 前后端分离项目一般禁用 CSRF
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/key").permitAll()                  // 允许匿名访问 /key
-                        .requestMatchers("/api/categories").permitAll()           // 允许匿名访问 /categories及其下属所有页面
+                        .requestMatchers("/api/categories").permitAll()           // 允许匿名访问 /categories
+                        .requestMatchers("/api/source/**").permitAll()            // 允许匿名访问 /source其下属所有页面
+                        .requestMatchers("/api/newest").permitAll()            // 允许匿名访问 /newest
                         .anyRequest().authenticated()                               // 其它请求需要认证
                 );
         return http.build();

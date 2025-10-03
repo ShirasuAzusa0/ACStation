@@ -13,8 +13,10 @@ public interface VideoRepository extends JpaRepository<Videos, Integer> {
     @Query(value = """
             SELECT videos.*
             FROM videos
-            JOIN tags ON videos.videoId = tags.video_id
+            JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
+            JOIN tags ON tags.tagId = tag_relationships.tag_id
             WHERE tags.tagName = :tag
+            AND videos.videoId != 0
             AND (
                 videos.videoTitle REGEXP :regex
                 OR videos.description REGEXP :regex
@@ -38,18 +40,58 @@ public interface VideoRepository extends JpaRepository<Videos, Integer> {
     );
 
     // 按Id顺序获取视频列表
-    @Query(value = "SELECT videos.* FROM videos JOIN tags ON videos.videoId = tags.video_id WHERE tagName = :tag ORDER BY videos.videoId ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT videos.*
+        FROM videos
+        JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND videos.videoId != 0
+        ORDER BY videos.videoId ASC;
+        """, nativeQuery = true)
     List<Videos> getVideosById(String tag);
 
     // 按照发布时间顺序获取视频列表（顺序）
-    @Query(value = "SELECT videos.* FROM videos JOIN tags ON videos.videoId = tags.video_id WHERE tagName = :tag ORDER BY videos.createdAt ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT videos.*
+        FROM videos
+        JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND videos.videoId != 0
+        ORDER BY videos.createdAt ASC;
+        """, nativeQuery = true)
     List<Videos> getVideosByNewest(String tag);
 
     // 按照发布时间顺序获取视频列表（逆序）
-    @Query(value = "SELECT videos.* FROM videos JOIN tags ON videos.videoId = tags.video_id WHERE tagName = :tag ORDER BY videos.createdAt DESC", nativeQuery = true)
+    @Query(value = """
+        SELECT videos.*
+        FROM videos
+        JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND videos.videoId != 0
+        ORDER BY videos.createdAt DESC;
+        """, nativeQuery = true)
     List<Videos> getVideosByOldest(String tag);
 
     // 按照观看数获取视频列表
-    @Query(value = "SELECT videos.* FROM videos JOIN tags ON videos.videoId = tags.video_id WHERE tagName = :tag ORDER BY videos.views ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT videos.*
+        FROM videos
+        JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND videos.videoId != 0
+        ORDER BY videos.views DESC;
+        """, nativeQuery = true)
     List<Videos> getVideosByPopular(String tag);
+
+    // 获取最新视频
+    @Query(value = """
+        SELECT videos.*
+        FROM videos
+        ORDER BY videos.createdAt DESC LIMIT 1;
+        """, nativeQuery = true)
+    Videos findNewestVideos();
 }

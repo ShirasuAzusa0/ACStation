@@ -38,18 +38,58 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
     );
 
     // 按Id顺序获取涂装列表
-    @Query(value = "SELECT cars.* FROM cars JOIN tags ON cars.carId = tags.car_id WHERE tagName = :tag ORDER BY cars.carId ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT cars.*
+        FROM cars
+        JOIN tag_relationships ON cars.carId = tag_relationships.car_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND cars.carId != 0
+        ORDER BY cars.carId ASC;
+        """, nativeQuery = true)
     List<Cars> getCarsById(String tag);
 
     // 按照发布时间顺序获取视频列表（顺序）
-    @Query(value = "SELECT cars.* FROM cars JOIN tags ON cars.carId = tags.car_id WHERE tagName = :tag ORDER BY cars.createdAt ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT cars.*
+        FROM cars
+        JOIN tag_relationships ON cars.carId = tag_relationships.car_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND cars.carId != 0
+        ORDER BY cars.createdAt ASC;
+        """, nativeQuery = true)
     List<Cars> getCarsByNewest(String tag);
 
     // 按照发布时间顺序获取视频列表（逆序）
-    @Query(value = "SELECT cars.* FROM cars JOIN tags ON cars.carId = tags.car_id WHERE tagName = :tag ORDER BY cars.createdAt DESC", nativeQuery = true)
+    @Query(value = """
+        SELECT cars.*
+        FROM cars
+        JOIN tag_relationships ON cars.carId = tag_relationships.car_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND cars.carId != 0
+        ORDER BY cars.createdAt DESC;
+        """, nativeQuery = true)
     List<Cars> getCarsByOldest(String tag);
 
     // 按照观看数获取视频列表
-    @Query(value = "SELECT cars.* FROM cars JOIN tags ON cars.carId = tags.car_id WHERE tagName = :tag ORDER BY cars.views ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT cars.*
+        FROM cars
+        JOIN tag_relationships ON cars.carId = tag_relationships.car_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND cars.carId != 0
+        ORDER BY cars.views DESC;
+        """, nativeQuery = true)
     List<Cars> getCarsByPopular(String tag);
+
+    // 获取最新车辆MOD
+    @Query(value = """
+        SELECT cars.*
+        FROM cars
+        ORDER BY cars.createdAt DESC LIMIT 1;
+        """, nativeQuery = true)
+    Cars findNewestCars();
 }

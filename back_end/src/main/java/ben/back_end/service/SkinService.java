@@ -32,4 +32,9 @@ public class SkinService {
             default -> null;
         };
     }
+
+    // 获取所有的涂装
+    public Skins getNewestSkins() {
+        return skinRepository.findNewestSkins();
+    }
 }

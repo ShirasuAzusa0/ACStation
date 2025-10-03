@@ -21,18 +21,8 @@ public class Tags {
     @Column(name = "tagName")
     private String tagName;
 
-    @ManyToMany(mappedBy = "tags")
-    private Set<Videos> videos;
-
-    @ManyToMany(mappedBy = "tags")
-    private Set<Skins> skins;
-
-    @ManyToMany(mappedBy = "tags")
-    private Set<Cars> cars;
-
-    @ManyToMany(mappedBy = "tags")
-    private Set<Tracks> tracks;
-
-    @ManyToMany(mappedBy = "tags")
-    private Set<Plugins> plugins;
+    @Getter
+    @Setter
+    @Column(name = "category")
+    private String category;
 }

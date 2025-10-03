@@ -32,4 +32,9 @@ public class VideoService {
             default -> null;
         };
     }
+
+    // 获取最新的视频
+    public Videos getNewestVideos() {
+        return videoRepository.findNewestVideos();
+    }
 }

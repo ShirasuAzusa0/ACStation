@@ -59,7 +59,7 @@ public class Tracks {
 
     @ManyToMany
     @JoinTable(
-            name = "tag-relationships",
+            name = "tag_relationships",
             joinColumns = @JoinColumn(name = "track_id", referencedColumnName = "trackId"),
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "tagId")
     )

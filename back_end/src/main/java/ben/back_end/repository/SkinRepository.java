@@ -38,19 +38,59 @@ public interface SkinRepository extends JpaRepository<Skins, Integer> {
     );
 
     // 按Id顺序获取涂装列表
-    @Query(value = "SELECT skins.* FROM skins JOIN tags ON skins.skinId = tags.skin_id WHERE tagName = :tag ORDER BY skins.skinId ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT skins.*
+        FROM skins
+        JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND skins.skinId != 0
+        ORDER BY skins.skinId ASC;
+        """, nativeQuery = true)
     List<Skins> getSkinsById(String tag);
 
     // 按照发布时间顺序获取视频列表（顺序）
-    @Query(value = "SELECT skins.* FROM skins JOIN tags ON skins.skinId = tags.skin_id WHERE tagName = :tag ORDER BY skins.createdAt ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT skins.*
+        FROM skins
+        JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND skins.skinId != 0
+        ORDER BY skins.createdAt ASC;
+        """, nativeQuery = true)
     List<Skins> getSkinsByNewest(String tag);
 
     // 按照发布时间顺序获取视频列表（逆序）
-    @Query(value = "SELECT skins.* FROM skins JOIN tags ON skins.skinId = tags.skin_id WHERE tagName = :tag ORDER BY skins.createdAt DESC", nativeQuery = true)
+    @Query(value = """
+        SELECT skins.*
+        FROM skins
+        JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND skins.skinId != 0
+        ORDER BY skins.createdAt DESC;
+        """, nativeQuery = true)
     List<Skins> getSkinsByOldest(String tag);
 
     // 按照观看数获取视频列表
-    @Query(value = "SELECT skins.* FROM skins JOIN tags ON skins.skinId = tags.skin_id WHERE tagName = :tag ORDER BY skins.views ASC", nativeQuery = true)
+    @Query(value = """
+        SELECT skins.*
+        FROM skins
+        JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
+        JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE tags.tagName = :tag
+          AND skins.skinId != 0
+        ORDER BY skins.views DESC;
+        """, nativeQuery = true)
     List<Skins> getSkinsByPopular(String tag);
+
+    // 获取最新涂装
+    @Query(value = """
+        SELECT skins.*
+        FROM skins
+        ORDER BY skins.createdAt DESC LIMIT 1;
+        """, nativeQuery = true)
+    Skins findNewestSkins();
 }
 

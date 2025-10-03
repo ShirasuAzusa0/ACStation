@@ -32,4 +32,9 @@ public class CarService {
             default -> null;
         };
     }
+
+    // 获取所有的车辆MOD
+    public Cars getNewestCars() {
+        return carRepository.findNewestCars();
+    }
 }

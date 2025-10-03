@@ -52,9 +52,14 @@ public class Videos {
     @Column(name = "BVid", nullable = false)
     private String BVid;
 
+    @Getter
+    @Setter
+    @Column(name = "shortInfo", nullable = false)
+    private String shortInfo;
+
     @ManyToMany
     @JoinTable(
-            name = "tag-relationships",
+            name = "tag_relationships",
             joinColumns = @JoinColumn(name = "video_id", referencedColumnName = "videoId"),
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "tagId")
     )
