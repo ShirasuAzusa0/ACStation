@@ -8,4 +8,6 @@ import lombok.Data;
 public class LoginDto {
     private String account;
     private String password;
+    private String captcha;
+    private String captchaKey;
 }

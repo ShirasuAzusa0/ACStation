@@ -12,6 +12,7 @@ import ben.back_end.util.JwtUtils;
 import ben.back_end.util.RSAKeyUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,26 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    private ResponseEntity<?> verifyCaptcha(String captchaKey, String captchaInput) {
+        if (captchaKey == null || captchaInput == null) {
+            return ResponseEntity.badRequest().body(RestBean.failure("验证码不能为空"));
+        }
+        System.out.println(captchaKey);
+        // 从 Redis 获取验证码
+        String redisCaptcha = redisTemplate.opsForValue().get("captcha:" + captchaKey);
+        System.out.println(redisCaptcha);
+        if (redisCaptcha == null) {
+            return ResponseEntity.badRequest().body(RestBean.failure("验证码已过期"));
+        }
+
+        if (!redisCaptcha.equalsIgnoreCase(captchaInput.trim())) {
+            return ResponseEntity.badRequest().body(RestBean.failure("验证码错误"));
+        }
+        // 验证通过后删除验证码，防止重复使用
+        redisTemplate.delete("captcha:" + captchaKey);
+        return null;
+    }
+
     @Resource
     private JwtUtils jwtUtils;
 
@@ -38,16 +59,24 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    StringRedisTemplate redisTemplate;
+
     // 注册
     @PostMapping("/register")
-    public ResponseEntity<?> register(@ModelAttribute RegisterDto dto) {
+    public ResponseEntity<?> register(@RequestBody RegisterDto dto) {
         if (userRepository.findByEmail(dto.getAccount()) != null) {
             return ResponseEntity.badRequest().body(RestBean.failure("该邮箱已被注册"));
         }
 
-        // 找到当前最大的userId
-        int maxId = userRepository.findMaxId();
-        int newId = maxId + 1;
+        // 验证验证码
+        String captchaKey = dto.getCaptchaKey();
+        String captchaInput = dto.getCaptcha();
+        ResponseEntity<?> captchaResult = verifyCaptcha(captchaKey, captchaInput);
+        // 验证失败直接返回
+        if (captchaResult != null) {
+            return captchaResult;
+        }
 
         // 对密码进行解密后再加密（RSA解密->BCrypt加密）
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
@@ -68,8 +97,7 @@ public class AuthController {
 
         Users user = new Users();
         // 手动设置
-        user.setUserId(newId);
-        user.setUserName(dto.getUsername());
+        user.setUserName(dto.getUserName());
         user.setEmail(dto.getAccount());
         user.setPassword(dto.getPassword());
         user.setAvatar("https://avatars.githubusercontent.com/u/19370775");
@@ -87,11 +115,11 @@ public class AuthController {
                 .authorities(auth.getAuthorities())
                 .build();
 
-        String token = jwtUtils.generateJWT(userDetails, user.getUserId(), dto.getUsername());
+        String token = jwtUtils.generateJWT(userDetails, user.getUserId(), dto.getUserName());
         String bearerToken = "Bearer " + token;
         RegisterVO vo = new RegisterVO();
-        vo.setUsername(dto.getUsername());
-        vo.setUserId(newId);
+        vo.setUsername(dto.getUserName());
+        vo.setUserId(user.getUserId());
         vo.setToken(bearerToken);
         return ResponseEntity.ok(
                 Map.of(
@@ -103,9 +131,18 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@ModelAttribute LoginDto dto) {
+    public ResponseEntity<?> login(@RequestBody LoginDto dto) {
         if (userRepository.findByEmail(dto.getAccount()) == null) {
             return ResponseEntity.badRequest().body(RestBean.failure("不存在该账号"));
+        }
+
+        // 验证验证码
+        String captchaKey = dto.getCaptchaKey();
+        String captchaInput = dto.getCaptcha();
+        ResponseEntity<?> captchaResult = verifyCaptcha(captchaKey, captchaInput);
+        // 验证失败直接返回
+        if (captchaResult != null) {
+            return captchaResult;
         }
 
         // 从application/json中获取邮箱

@@ -4,6 +4,5 @@ import lombok.Data;
 
 @Data
 public class CaptchaVO {
-    String captchaCode;
     byte[] captchaBytes;
 }

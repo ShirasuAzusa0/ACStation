@@ -6,7 +6,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class RegisterDto {
-    private String username;
+    private String userName;
     private String account;
     private String password;
+    private String captcha;
+    private String captchaKey;
 }

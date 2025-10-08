@@ -49,6 +49,7 @@ public class Users {
     @Getter
     @Setter
     @Column(name = "type", nullable = false, columnDefinition = "enum('user', 'admin')")
+    @Enumerated(EnumType.STRING)
     private userType type;
 
 }
