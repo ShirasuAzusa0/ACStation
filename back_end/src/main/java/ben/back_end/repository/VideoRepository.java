@@ -94,4 +94,11 @@ public interface VideoRepository extends JpaRepository<Videos, Integer> {
         ORDER BY videos.createdAt DESC LIMIT 1;
         """, nativeQuery = true)
     Videos findNewestVideos();
+
+    // 获取所有视频数据
+    @Query(value = """
+        SELECT videos.*
+        FROM videos
+        """, nativeQuery = true)
+    List<Videos> findAllVideos();
 }

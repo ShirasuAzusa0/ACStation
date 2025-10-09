@@ -37,4 +37,9 @@ public class VideoService {
     public Videos getNewestVideos() {
         return videoRepository.findNewestVideos();
     }
+
+    // 获取所有视频
+    public List<Videos> getAllVideos() {
+        return videoRepository.findAllVideos();
+    }
 }
