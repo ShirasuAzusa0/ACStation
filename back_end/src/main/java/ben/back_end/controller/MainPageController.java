@@ -41,13 +41,13 @@ public class MainPageController {
                 itemVO.setDescription(video.getShortInfo());
             } else if (entity instanceof Skins skin) {
                 itemVO.setName(skin.getSkinName());
-                itemVO.setDescription(skin.getDescription());
+                itemVO.setDescription(skin.getShortInfo());
             } else if (entity instanceof Cars car) {
                 itemVO.setName(car.getCarModName());
-                itemVO.setDescription(car.getDescription());
+                itemVO.setDescription(car.getShortInfo());
             } else if (entity instanceof Tracks track) {
                 itemVO.setName(track.getTrackModName());
-                itemVO.setDescription(track.getDescription());
+                itemVO.setDescription(track.getShortInfo());
             } else if (entity instanceof Plugins plugin) {
                 itemVO.setName(plugin.getPluginName());
                 itemVO.setDescription(plugin.getDescription());

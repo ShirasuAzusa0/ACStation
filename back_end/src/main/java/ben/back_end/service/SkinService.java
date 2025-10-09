@@ -37,4 +37,9 @@ public class SkinService {
     public Skins getNewestSkins() {
         return skinRepository.findNewestSkins();
     }
+
+    // 通过名称获取涂装
+    public Skins getSkinByName(String skinName) {
+        return skinRepository.findSkinByName(skinName);
+    }
 }

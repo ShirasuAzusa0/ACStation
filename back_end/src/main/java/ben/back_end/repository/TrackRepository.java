@@ -25,11 +25,11 @@ public interface TrackRepository extends JpaRepository<Tracks, Integer> {
                 WHEN :choice = 2 THEN tracks.createdAt
                 WHEN :choice = 3 THEN tracks.createdAt
                 WHEN :choice = 4 THEN tracks.views
-            END
+            END,
             CASE
-                WHEN :choice = 3 THEN DESC
-                ELSE ASC
-            END
+                WHEN :choice = 3 THEN 1
+                ELSE 0
+            END DESC
         """, nativeQuery = true)
     List<Tracks> SearchTracks(
             @Param("tags") String tag,
@@ -92,4 +92,12 @@ public interface TrackRepository extends JpaRepository<Tracks, Integer> {
         ORDER BY tracks.createdAt DESC LIMIT 1;
         """, nativeQuery = true)
     Tracks findNewestTracks();
+
+    // 通过名称获取赛道MOD
+    @Query(value = """
+        SELECT tracks.*
+        FROM tracks
+        WHERE tracks.trackModName = :trackModName;
+        """, nativeQuery = true)
+    Tracks findTrackByModName(String trackModName);
 }

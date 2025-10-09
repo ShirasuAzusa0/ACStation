@@ -37,4 +37,9 @@ public class CarService {
     public Cars getNewestCars() {
         return carRepository.findNewestCars();
     }
+
+    // 通过名称获取车辆MOD
+    public Cars getCarByName(String carModName) {
+        return carRepository.findCarByModName(carModName);
+    }
 }

@@ -27,11 +27,11 @@ public interface VideoRepository extends JpaRepository<Videos, Integer> {
                 WHEN :choice = 2 THEN videos.createdAt
                 WHEN :choice = 3 THEN videos.createdAt
                 WHEN :choice = 4 THEN videos.views
-              END
+              END,
               CASE
-                WHEN :choice = 3 THEN DESC
-                ELSE ASC
-              END
+                WHEN :choice = 3 THEN 1
+                ELSE 0
+              END DESC
            """, nativeQuery = true)
     List<Videos> SearchVideos(
             @Param("tag") String tag,

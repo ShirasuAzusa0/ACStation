@@ -25,11 +25,11 @@ public interface SkinRepository extends JpaRepository<Skins, Integer> {
                 WHEN :choice = 2 THEN skins.createdAt
                 WHEN :choice = 3 THEN skins.createdAt
                 WHEN :choice = 4 THEN skins.views
-            END
+            END,
             CASE
-                WHEN :choice = 3 THEN DESC
-                ELSE ASC
-            END
+                WHEN :choice = 3 THEN 1
+                ELSE 0
+            END DESC
         """, nativeQuery = true)
     List<Skins> SearchSkins(
             @Param("tags") String tag,
@@ -92,5 +92,13 @@ public interface SkinRepository extends JpaRepository<Skins, Integer> {
         ORDER BY skins.createdAt DESC LIMIT 1;
         """, nativeQuery = true)
     Skins findNewestSkins();
+
+    // 通过名称获取涂装
+    @Query(value = """
+        SELECT skins.*
+        FROM skins
+        WHERE skins.skinName = :skinName;
+        """, nativeQuery = true)
+    Skins findSkinByName(String skinName);
 }
 

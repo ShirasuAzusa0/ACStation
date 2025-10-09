@@ -57,6 +57,11 @@ public class Tracks {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Getter
+    @Setter
+    @Column(name = "shortInfo", nullable = false)
+    private String shortInfo;
+
     @ManyToMany
     @JoinTable(
             name = "tag_relationships",

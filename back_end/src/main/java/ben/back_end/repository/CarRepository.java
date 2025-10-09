@@ -25,11 +25,11 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
                 WHEN :choice = 2 THEN cars.createdAt
                 WHEN :choice = 3 THEN cars.createdAt
                 WHEN :choice = 4 THEN cars.views
-            END
+            END,
             CASE
-                WHEN :choice = 3 THEN DESC
-                ELSE ASC
-            END
+                WHEN :choice = 3 THEN 1
+                ELSE 0
+            END DESC
         """, nativeQuery = true)
     List<Cars> SearchCars(
             @Param("tags") String tag,
@@ -37,7 +37,7 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
             @Param("choice") int choice
     );
 
-    // 按Id顺序获取涂装列表
+    // 按Id顺序获取车辆MOD列表
     @Query(value = """
         SELECT cars.*
         FROM cars
@@ -49,7 +49,7 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
         """, nativeQuery = true)
     List<Cars> getCarsById(String tag);
 
-    // 按照发布时间顺序获取视频列表（顺序）
+    // 按照发布时间顺序获取车辆MOD列表（顺序）
     @Query(value = """
         SELECT cars.*
         FROM cars
@@ -61,7 +61,7 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
         """, nativeQuery = true)
     List<Cars> getCarsByNewest(String tag);
 
-    // 按照发布时间顺序获取视频列表（逆序）
+    // 按照发布时间顺序获取车辆MOD列表（逆序）
     @Query(value = """
         SELECT cars.*
         FROM cars
@@ -73,7 +73,7 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
         """, nativeQuery = true)
     List<Cars> getCarsByOldest(String tag);
 
-    // 按照观看数获取视频列表
+    // 按照观看数获取车辆MOD列表
     @Query(value = """
         SELECT cars.*
         FROM cars
@@ -92,4 +92,12 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
         ORDER BY cars.createdAt DESC LIMIT 1;
         """, nativeQuery = true)
     Cars findNewestCars();
+
+    // 通过名称获取车辆MOD
+    @Query(value = """
+        SELECT cars.*
+        FROM cars
+        WHERE cars.carModName = :carModName;
+        """, nativeQuery = true)
+    Cars findCarByModName(String carModName);
 }

@@ -37,4 +37,9 @@ public class TrackService {
     public Tracks getNewestTracks() {
         return trackRepository.findNewestTracks();
     }
+
+    // 通过名称获取赛道MOD
+    public Tracks getTrackByName(String trackName) {
+        return trackRepository.findTrackByModName(trackName);
+    }
 }

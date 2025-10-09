@@ -25,11 +25,11 @@ public interface PluginRepository extends JpaRepository<Plugins, Integer> {
                 WHEN :choice = 2 THEN plugins.createdAt
                 WHEN :choice = 3 THEN plugins.createdAt
                 WHEN :choice = 4 THEN plugins.views
-            END
+            END,
             CASE
-                WHEN :choice = 3 THEN DESC
-                ELSE ASC
-            END
+                WHEN :choice = 3 THEN 1
+                ELSE 0
+            END DESC
         """, nativeQuery = true)
     List<Plugins> SearchPlugins(
             @Param("tags") String tag,
