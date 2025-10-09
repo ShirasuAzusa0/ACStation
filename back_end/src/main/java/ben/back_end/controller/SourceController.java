@@ -4,10 +4,17 @@ import ben.back_end.entity.*;
 import ben.back_end.entity.dto.SearchDto;
 import ben.back_end.entity.vo.response.*;
 import ben.back_end.service.*;
+import ben.back_end.util.JwtUtils;
+import cn.hutool.core.io.resource.InputStreamResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +36,8 @@ public class SourceController {
 
     @Autowired
     private PluginService pluginService;
+    @Autowired
+    private JwtUtils jwtUtils;
 
     // 获取视频列表
     @GetMapping("/get_videos")
@@ -322,5 +331,39 @@ public class SourceController {
                         "data", vos
                 )
         );
+    }
+
+    // 下载（车辆/赛道/图装）.zip 压缩文件
+    @GetMapping("/api/source/{type}/{name}/download")
+    public ResponseEntity<?> GetFileDownload(@PathVariable String type, @PathVariable String name, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        // 检查用户是否登录
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(RestBean.failure("用户未登录"));
+        }
+
+        String token = authHeader.substring(7);
+        if(jwtUtils.verifyJWT(token) != null) {
+            return ResponseEntity.badRequest().body(RestBean.failure("Token已过期"));
+        }
+
+        // 构建文件路径
+        Path filePath = Paths.get("src/main/resources/" + type, name + ".zip");
+        if (!Files.exists(filePath)) {
+            return ResponseEntity.badRequest().body(RestBean.failure("未找到对应的下载文件: " + name));
+        }
+
+        // 返回文件流
+        try {
+            InputStreamResource resource = new InputStreamResource(Files.newInputStream(filePath));
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filePath.getFileName());
+            headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(Files.size(filePath))
+                    .body(resource);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(RestBean.failure("文件读取失败：" + e.getMessage()));
+        }
     }
 }
