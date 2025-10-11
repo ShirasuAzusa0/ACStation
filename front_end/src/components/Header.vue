@@ -5,6 +5,7 @@ import { useRouter, useRoute } from 'vue-router'
 // 引入scss样式
 import '@/styles/variables.scss'
 import {useUserStore} from "@/stores/user.js";
+import {ElMessage} from "element-plus";
 // 移动端菜单开关
 const isMenuOpen = ref(true)
 const router = useRouter()
@@ -25,7 +26,7 @@ const navLinks = [
 navLinks.forEach(l => (l.to = { name: l.name }))
 
 function goHome() {
-  if (route.path == "/Home") {
+  if (route.path === "/Home") {
     window.location.reload()
   }
   else {
@@ -43,6 +44,8 @@ function SignIn() {
 
 function LogOut() {
   userStore.logout()
+  ElMessage.success("已登出账号")
+  router.push("/Home")
 }
 </script>
 
@@ -67,14 +70,21 @@ function LogOut() {
 
       <!-- 用户操作（登录/注册） -->
       <div class="rent-header__user_action">
-        <template v-if="userStore.user">
-          <img :src="userStore.user.avatar" alt="avatar" class="user-avatar" />
-          <span class="user-name">{{ userStore.user.name }}</span>
-          <button class="rent-btn rent-btn--SignIn" @click="logout">Logout</button>
+        <!-- 登录状态 -->
+        <template v-if="userStore.user && userStore.user.username">
+          <img
+              :src="userStore.user.avatar || 'https://avatars.githubusercontent.com/u/19370775'"
+              alt="avatar"
+              class="user-avatar"
+          />
+          <span class="user-name">{{ userStore.user.username }}</span>
+          <button class="rent-btn rent-btn--SignIn" @click="LogOut">Logout</button>
         </template>
+
+        <!-- 未登录状态 -->
         <template v-else>
-          <button class="rent-btn rent-btn--SignIn" @click="SignUp">Sign Up</button>
-          <button class="rent-btn rent-btn--SignUp" @click="SignIn">Sign In</button>
+          <button class="rent-btn rent-btn--SignIn" @click="SignIn">Sign In</button>
+          <button class="rent-btn rent-btn--SignUp" @click="SignUp">Sign Up</button>
         </template>
       </div>
     </div>

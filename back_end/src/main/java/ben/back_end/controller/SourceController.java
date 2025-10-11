@@ -5,7 +5,6 @@ import ben.back_end.entity.dto.SearchDto;
 import ben.back_end.entity.vo.response.*;
 import ben.back_end.service.*;
 import ben.back_end.util.JwtUtils;
-import cn.hutool.core.io.resource.InputStreamResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -192,7 +191,7 @@ public class SourceController {
         );
     }
 
-    // 获取具体的车辆模组页面信息
+    // 获取具体的涂装页面信息
     @GetMapping("/skins/{skinName}")
     public ResponseEntity<?> GetSkinDetails(@PathVariable String skinName) {
         Skins skin = skinService.getSkinByName(skinName);
@@ -217,7 +216,7 @@ public class SourceController {
         );
     }
 
-    // 获取具体的车辆模组页面信息
+    // 获取具体的赛道模组页面信息
     @GetMapping("/tracks/{trackModName}")
     public ResponseEntity<?> GetTrackDetails(@PathVariable String trackModName) {
         Tracks track = trackService.getTrackByName(trackModName);
@@ -334,7 +333,7 @@ public class SourceController {
     }
 
     // 下载（车辆/赛道/图装）.zip 压缩文件
-    @GetMapping("/api/source/{type}/{name}/download")
+    @GetMapping("/{type}/{name}/download")
     public ResponseEntity<?> GetFileDownload(@PathVariable String type, @PathVariable String name, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         // 检查用户是否登录
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -347,21 +346,22 @@ public class SourceController {
         }
 
         // 构建文件路径
-        Path filePath = Paths.get("src/main/resources/" + type, name + ".zip");
+        Path filePath = Paths.get("src/main/resources/static/" + type, name + ".zip");
         if (!Files.exists(filePath)) {
             return ResponseEntity.badRequest().body(RestBean.failure("未找到对应的下载文件: " + name));
         }
 
         // 返回文件流
         try {
-            InputStreamResource resource = new InputStreamResource(Files.newInputStream(filePath));
+            byte[] fileContent = Files.readAllBytes(filePath);
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filePath.getFileName());
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filePath.getFileName() +  "\"");
             headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
+            headers.setContentLength(Files.size(filePath));
             return ResponseEntity.ok()
                     .headers(headers)
                     .contentLength(Files.size(filePath))
-                    .body(resource);
+                    .body(fileContent);
         } catch (IOException e) {
             return ResponseEntity.badRequest().body(RestBean.failure("文件读取失败：" + e.getMessage()));
         }

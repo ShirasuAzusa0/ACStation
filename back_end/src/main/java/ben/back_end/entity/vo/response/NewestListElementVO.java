@@ -7,5 +7,6 @@ public class NewestListElementVO {
     String name;
     String description;
     String url;
+    String preview;
     String type;
 }

@@ -39,18 +39,28 @@ public class MainPageController {
             if (entity instanceof Videos video) {
                 itemVO.setName(video.getVideoTitle());
                 itemVO.setDescription(video.getShortInfo());
+                itemVO.setUrl(video.getLinkURL());
+                itemVO.setPreview(video.getVideoAvatar());
             } else if (entity instanceof Skins skin) {
                 itemVO.setName(skin.getSkinName());
                 itemVO.setDescription(skin.getShortInfo());
+                itemVO.setUrl(skin.getLinkURL());
+                itemVO.setPreview(skin.getSkinAvatar());
             } else if (entity instanceof Cars car) {
                 itemVO.setName(car.getCarModName());
                 itemVO.setDescription(car.getShortInfo());
+                itemVO.setUrl(car.getLinkURL());
+                itemVO.setPreview(car.getCarAvatar());
             } else if (entity instanceof Tracks track) {
                 itemVO.setName(track.getTrackModName());
                 itemVO.setDescription(track.getShortInfo());
+                itemVO.setUrl(track.getLinkURL());
+                itemVO.setPreview(track.getTrackAvatar());
             } else if (entity instanceof Plugins plugin) {
                 itemVO.setName(plugin.getPluginName());
                 itemVO.setDescription(plugin.getDescription());
+                itemVO.setUrl(plugin.getLinkURL());
+                itemVO.setPreview(plugin.getPluginAvatar());
             }
             itemVO.setType(type); // 设置类型
         }

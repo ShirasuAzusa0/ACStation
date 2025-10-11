@@ -6,5 +6,6 @@ import lombok.Data;
 public class LoginVO {
     private int userId;
     private String username;
+    private String avatar;
     private String token;
 }

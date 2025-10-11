@@ -65,7 +65,21 @@ const router = createRouter({
             component: () => import('@/views/SourcePage/VideoView.vue'),
             children: []
         }
-    ]
+    ],
+    scrollBehavior(to, from, savedPosition) {
+        // 如果用户使用浏览器前进/后退，保留历史滚动位置
+        if (savedPosition) {
+            return savedPosition
+        }
+
+        // 如果 URL 有 hash（锚点），尝试滚到锚点
+        if (to.hash) {
+            return { el: to.hash, behavior: 'smooth' }
+        }
+
+        // 默认：回到页面顶端
+        return { left: 0, top: 0 } // 可加 behavior: 'auto' 或 'smooth'
+    }
 })
 
 /*

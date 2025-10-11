@@ -13,10 +13,18 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
     @Query(value = """
             SELECT cars.*
             FROM cars
-            JOIN tags ON cars.carId = tags.car_id
-            WHERE tags.tagName = :tag
+            WHERE cars.carId != 0
+             AND (
+               (:tag IS NULL OR :tag = '')
+               OR cars.carId IN (
+                   SELECT tag_relationships.car_id
+                   FROM tag_relationships
+                   JOIN tags ON tags.tagId = tag_relationships.tag_id
+                   WHERE tags.tagName = :tag
+               )
+             )
             AND (
-                    cars.carName REGEXP :regex
+                    cars.carModName REGEXP :regex
                     OR cars.description REGEXP :regex
                 )
             ORDER BY
@@ -41,9 +49,9 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
     @Query(value = """
         SELECT cars.*
         FROM cars
-        JOIN tag_relationships ON cars.carId = tag_relationships.car_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON cars.carId = tag_relationships.car_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND cars.carId != 0
         ORDER BY cars.carId ASC;
         """, nativeQuery = true)
@@ -53,9 +61,9 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
     @Query(value = """
         SELECT cars.*
         FROM cars
-        JOIN tag_relationships ON cars.carId = tag_relationships.car_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON cars.carId = tag_relationships.car_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND cars.carId != 0
         ORDER BY cars.createdAt ASC;
         """, nativeQuery = true)
@@ -65,9 +73,9 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
     @Query(value = """
         SELECT cars.*
         FROM cars
-        JOIN tag_relationships ON cars.carId = tag_relationships.car_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON cars.carId = tag_relationships.car_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND cars.carId != 0
         ORDER BY cars.createdAt DESC;
         """, nativeQuery = true)
@@ -77,9 +85,9 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
     @Query(value = """
         SELECT cars.*
         FROM cars
-        JOIN tag_relationships ON cars.carId = tag_relationships.car_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON cars.carId = tag_relationships.car_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND cars.carId != 0
         ORDER BY cars.views DESC;
         """, nativeQuery = true)

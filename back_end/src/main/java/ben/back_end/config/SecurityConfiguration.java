@@ -31,6 +31,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/source/**").permitAll()            // 允许匿名访问 /source 其下属所有页面
                         .requestMatchers("/api/newest").permitAll()               // 允许匿名访问 /newest
                         .requestMatchers("/api/captcha").permitAll()              // 允许匿名访问 /captcha
+                        .requestMatchers("/img/**").permitAll()                   // 允许匿名访问 /img
                         .anyRequest().authenticated()                               // 其它请求需要认证
                 );
         return http.build();

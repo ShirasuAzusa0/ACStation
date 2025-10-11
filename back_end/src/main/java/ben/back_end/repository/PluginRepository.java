@@ -13,8 +13,16 @@ public interface PluginRepository extends JpaRepository<Plugins, Integer> {
     @Query(value = """
             SELECT plugins.*
             FROM plugins
-            JOIN tags ON plugins.pluginId = tags.plugin_id
-            WHERE tags.tagName = :tag
+            WHERE plugins.pluginId != 0
+             AND (
+               (:tag IS NULL OR :tag = '')
+               OR plugins.pluginId IN (
+                   SELECT tag_relationships.plugin_id
+                   FROM tag_relationships
+                   JOIN tags ON tags.tagId = tag_relationships.tag_id
+                   WHERE tags.tagName = :tag
+               )
+             )
             AND (
                     plugins.pluginName REGEXP :regex
                     OR plugins.description REGEXP :regex
@@ -41,9 +49,9 @@ public interface PluginRepository extends JpaRepository<Plugins, Integer> {
     @Query(value = """
         SELECT plugins.*
         FROM plugins
-        JOIN tag_relationships ON plugins.pluginId = tag_relationships.plugin_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON plugins.pluginId = tag_relationships.plugin_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND plugins.pluginId != 0
         ORDER BY plugins.pluginId ASC;
         """, nativeQuery = true)
@@ -53,9 +61,9 @@ public interface PluginRepository extends JpaRepository<Plugins, Integer> {
     @Query(value = """
         SELECT plugins.*
         FROM plugins
-        JOIN tag_relationships ON plugins.pluginId = tag_relationships.plugin_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON plugins.pluginId = tag_relationships.plugin_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND plugins.pluginId != 0
         ORDER BY plugins.createdAt ASC;
         """, nativeQuery = true)
@@ -65,9 +73,9 @@ public interface PluginRepository extends JpaRepository<Plugins, Integer> {
     @Query(value = """
         SELECT plugins.*
         FROM plugins
-        JOIN tag_relationships ON plugins.pluginId = tag_relationships.plugin_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON plugins.pluginId = tag_relationships.plugin_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND plugins.pluginId != 0
         ORDER BY plugins.createdAt DESC;
         """, nativeQuery = true)
@@ -77,9 +85,9 @@ public interface PluginRepository extends JpaRepository<Plugins, Integer> {
     @Query(value = """
         SELECT plugins.*
         FROM plugins
-        JOIN tag_relationships ON plugins.pluginId = tag_relationships.plugin_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON plugins.pluginId = tag_relationships.plugin_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND plugins.pluginId != 0
         ORDER BY plugins.views DESC;
         """, nativeQuery = true)

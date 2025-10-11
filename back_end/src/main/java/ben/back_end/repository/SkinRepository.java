@@ -13,8 +13,16 @@ public interface SkinRepository extends JpaRepository<Skins, Integer> {
     @Query(value = """
             SELECT skins.*
             FROM skins
-            JOIN tags ON skins.skinId = tags.skin_id
-            WHERE tags.tagName = :tag
+            WHERE skins.skinId != 0
+             AND (
+               (:tag IS NULL OR :tag = '')
+               OR skins.skinId IN (
+                       SELECT tag_relationships.skin_id
+                       FROM tag_relationships
+                       JOIN tags ON tags.tag_id = tag_relationships.tag_id
+                       WHERE tags.tagName = :tag
+               )
+            )
             AND (
                     skins.skinName REGEXP :regex
                     OR skins.description REGEXP :regex
@@ -41,9 +49,9 @@ public interface SkinRepository extends JpaRepository<Skins, Integer> {
     @Query(value = """
         SELECT skins.*
         FROM skins
-        JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND skins.skinId != 0
         ORDER BY skins.skinId ASC;
         """, nativeQuery = true)
@@ -53,9 +61,9 @@ public interface SkinRepository extends JpaRepository<Skins, Integer> {
     @Query(value = """
         SELECT skins.*
         FROM skins
-        JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND skins.skinId != 0
         ORDER BY skins.createdAt ASC;
         """, nativeQuery = true)
@@ -65,9 +73,9 @@ public interface SkinRepository extends JpaRepository<Skins, Integer> {
     @Query(value = """
         SELECT skins.*
         FROM skins
-        JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND skins.skinId != 0
         ORDER BY skins.createdAt DESC;
         """, nativeQuery = true)
@@ -77,9 +85,9 @@ public interface SkinRepository extends JpaRepository<Skins, Integer> {
     @Query(value = """
         SELECT skins.*
         FROM skins
-        JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON skins.skinId = tag_relationships.skin_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND skins.skinId != 0
         ORDER BY skins.views DESC;
         """, nativeQuery = true)

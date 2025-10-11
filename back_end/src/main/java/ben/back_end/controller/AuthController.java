@@ -120,6 +120,7 @@ public class AuthController {
         RegisterVO vo = new RegisterVO();
         vo.setUsername(dto.getUserName());
         vo.setUserId(user.getUserId());
+        vo.setAvatar(user.getAvatar());
         vo.setToken(bearerToken);
         return ResponseEntity.ok(
                 Map.of(
@@ -130,6 +131,7 @@ public class AuthController {
         );
     }
 
+    // 登录
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDto dto) {
         if (userRepository.findByEmail(dto.getAccount()) == null) {
@@ -188,6 +190,7 @@ public class AuthController {
         LoginVO vo = new LoginVO();
         vo.setUsername(user.getUserName());
         vo.setUserId(user.getUserId());
+        vo.setAvatar(user.getAvatar());
         vo.setToken(bearerToken);
 
         return ResponseEntity.ok(

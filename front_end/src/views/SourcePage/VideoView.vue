@@ -1,15 +1,20 @@
 <script setup>
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
-import { ref, reactive, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import {VideoPlay, VideoPause} from "@element-plus/icons-vue";
 import axios from "axios";
 
 // 表单状态（排序规则、分类tag）
-const form = reactive({
+const form = ref({
   sort: "default",  // 默认按编号排序规则
-  categoryId: null  // 当前分类（null则为全部）
+  tag: null         // 当前分类（null则为全部）
 })
+
+// 更新 videos 数据后修改该值以实现动态加载效果
+const listKey = ref(0)
+// 控制是否触发过渡动画
+const isTransitionEnabled = ref(false);
 
 // 分类数据
 const categories = ref([])
@@ -26,44 +31,80 @@ const currentQuery = ref("")
 // 几乎所有组件内逻辑函数都应该写成箭头函数
 // 全局工具函数、对外暴露API和生命周期钩子里定义的函数适合用function常见
 
-// 分类选择
-const selectCatag = (cat) => {
-  form.categoryId = cat.id
-  fetchVideos()
+// 排序规则映射
+function getChoiceFromSort(sort) {
+  switch (sort) {
+    case "default": return 1
+    case "newest": return 2
+    case "oldest": return 3
+    case "most_popular": return 4
+    default: return 5
+  }
 }
 
-const clearCategory = () => {
-  form.categoryId = null
+// 封面图片路径解析
+function getPreviewPath(preview) {
+  // 若为空，返回一个默认图片路径
+  if (preview === 'none') {
+    return '/NewestNotFound.jpg'
+  }
+  // 若图片路径以http或https开头，直接返回
+  if (preview.startsWith('http') || preview.startsWith('https')) {
+    // 如果是 B 站图片，使用更稳定的处理方式
+    if (preview.includes('bilibili.com') || preview.includes('hdslb.com')) {
+      // 使用images.weserv.nl代理
+      return `https://images.weserv.nl?url=${encodeURIComponent(preview)}`;
+    }
+    return preview
+  }
+}
+
+// 分类选择
+const selectCatag = (cat) => {
+  form.value.tag = cat.name
   fetchVideos()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
+}
+
+// 选择“全部”标签
+const clearCategory = () => {
+  form.value.tag = null
+  fetchVideos()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 回车进行搜索
 const onSearchEnter = () => {
-  fetchVideos()
+  searchVideos()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 点search按钮进行搜索
 const onSubmitForm = () => {
-  fetchVideos()
+  searchVideos()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 获取分类（后端提供tag信息）
-const fetchCategories = async () => {
+const fetchCategories = async (categoryType = "video") => {
   categoriesLoading.value = true
   try {
-    if (process.env.NODE_ENV === "development") {
-      // 🟡 本地开发时：模拟分类
-      categories.value = [
-        { id: 1, name: "汽车" },
-        { id: 2, name: "赛车" },
-        { id: 3, name: "测试视频" },
-      ]
+    const res = await axios.get("/api/categories", {params: {category: categoryType}})
+    if (res.data?.status === "success" && Array.isArray(res.data.tags)) {
+      categories.value = res.data.tags.map(tag => ({
+        tagId: tag.tagId,
+        name: tag.tagName
+      }))
     } else {
-      // 🟢 生产环境：调用后端
-      const res = await axios.get("/api/video/categories")
-      categories.value = res.data
+      console.warn("后端返回格式异常:", res.data)
+      categories.value = []
     }
   } catch (err) {
+    console.error("获取标签失败:", err)
     error.value = err.message || "标签获取失败"
     categories.value = []
   } finally {
@@ -71,38 +112,71 @@ const fetchCategories = async () => {
   }
 }
 
-// 获取视频（后端提供视频信息）
+// 获取视频（通过分类和排序规则获取，后端提供视频信息）
 const fetchVideos = async () => {
   loading.value = true
   error.value = null
   try {
-    if (process.env.NODE_ENV === "development") {
-      // 模拟数据
-      videos.value = [
-        {
-          id: 1,
-          url: "https://example.com/1",
-          thumb: "NewestNotFound.jpg",
-          title: "模拟视频 1",
-          views: 123,
-          createdAt: "2025-09-16"
-        },
-        {
-          id: 2,
-          url: "https://example.com/2",
-          thumb: "NewestNotFound.jpg",
-          title: "模拟视频 2",
-          views: 456,
-          createdAt: "2025-09-15"
-        }
-      ]
+    const params = {
+      tag: form.value.tag ?? "",
+      choice: getChoiceFromSort(form.value.sort)
+    }
+    const res = await axios.get("/api/source/get_videos", { params })
+    if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+      videos.value = res.data.data.map((item, index) => ({
+        id: index + 1,
+        videoTitle: item.videoTitle,
+        videoAvatar: getPreviewPath(item.videoAvatar),
+        linkURL: item.linkURL,
+        views: item.views,
+        createdAt: item.createdAt
+      }))
     } else {
-      // 真正请求后端
-      const res = await axios.get("/api/videos", { params: { ...form } })
-      videos.value = res.data
+      videos.value = []
+      console.warn("get_videos 返回格式异常", res.data)
     }
   } catch (err) {
-    error.value = err.message || "未知错误"
+    console.error("获取视频失败:", err)
+    error.value = err.message || "获取视频失败"
+    videos.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// 搜索获取视频
+const searchVideos = async () => {
+  const keyword = currentQuery.value.trim()
+  if (!keyword) {
+    // 空搜索 → 显示默认视频
+    await fetchVideos()
+    return
+  }
+  loading.value = true
+  error.value = null
+  try {
+    const payload = {
+      tag: form.value.tag ?? "",
+      choice: getChoiceFromSort(form.value.sort),
+      search: keyword
+    }
+    const res = await axios.post("/api/source/search/video", payload)
+    if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+      videos.value = res.data.data.map((item, index) => ({
+        id: index + 1,
+        videoTitle: item.videoTitle,
+        videoAvatar: getPreviewPath(item.videoAvatar),
+        linkURL: item.linkURL,
+        views: item.views,
+        createdAt: item.createdAt
+      }))
+    } else {
+      videos.value = []
+      console.warn("search 接口返回异常", res.data)
+    }
+  } catch (err) {
+    console.error("搜索失败:", err)
+    error.value = err.message || "搜索失败"
     videos.value = []
   } finally {
     loading.value = false
@@ -146,10 +220,10 @@ onMounted(() => {
                 <button
                     type="button"
                     class="category-chip"
-                    :class="{ active: form.categoryId === null }"
+                    :class="{ active: form.tag === null }"
                     @click="clearCategory">
                   <el-icon>
-                    <video-pause v-if="form.categoryId === null" />
+                    <video-pause v-if="form.tag === null" />
                     <video-play v-else />
                   </el-icon>
                   全部</button>
@@ -159,13 +233,13 @@ onMounted(() => {
                 <template v-else>
                   <button
                       v-for="cat in categories"
-                      :key="cat.id"
+                      :key="cat.tagId"
                       type="button"
                       class="category-chip"
-                      :class="{ active: form.categoryId === cat.id }"
+                      :class="{ active: form.tag === cat.name }"
                       @click="selectCatag(cat)">
                     <el-icon>
-                      <video-pause v-if="form.categoryId === cat.id" />
+                      <video-pause v-if="form.tag === cat.name" />
                       <video-play v-else />
                     </el-icon>
                     <span class="cat-name">{{ cat.name }}</span>
@@ -205,20 +279,20 @@ onMounted(() => {
               <p>呃啊，Azusa找不到你想要的视频，请换个方式查询吧</p>
             </div>
             <!-- 正常视频列表 -->
-            <div v-else class="list__grid">
+            <div v-else class="list__grid" :key="listKey" :class="{'fade-in-animation': isTransitionEnabled}">
               <div v-for="video in videos" :key="video.id" class="video__card">
                 <!-- 缩略图（可通过点击跳转新页面播放） -->
-                <a :href="video.url" target="_blank">
-                  <img :src="video.thumb" :alt="video.title" class="card__thumb" />
+                <a :href="video.linkURL" target="_blank">
+                  <img :src="video.videoAvatar" :alt="video.title" class="card__thumb" />
                 </a>
                 <!-- 标题（可通过点击跳转新页面播放） -->
-                <a :href="video.url" target="_blank" class="card__title">
-                  {{ video.title }}
+                <a :href="video.videoTitle" target="_blank" class="card__title">
+                  {{ video.videoTitle }}
                 </a>
                 <!-- 播放量、发布时间等元数据 -->
                 <div class="card__meta">
                   <span>{{ video.views }} 次播放</span>
-                  <span>{{ video.createdAt }}</span>
+                  <span>{{ video.createdAt.split('T')[0] }}</span>
                 </div>
               </div>
             </div>
@@ -431,6 +505,10 @@ onMounted(() => {
       }
     }
   }
+}
+
+.fade-in-animation {
+  animation: fadeInBottom 0.5s ease-out 0.5s both;
 }
 
 /* 自定义 el-select 的悬停和过渡 */

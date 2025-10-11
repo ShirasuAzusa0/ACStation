@@ -1,15 +1,18 @@
 <script setup>
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
-import {onMounted, reactive, ref} from "vue";
+import {onMounted, ref} from "vue";
 import { Medal } from "@element-plus/icons-vue";
 import axios from "axios";
 
 // 表单状态（排序规则 & 分类tags）
-const form = reactive({
+const form = ref({
   sort: "default",
-  categoryId: null
+  tag: null
 })
+
+const listKey = ref(0)
+const isTransitionEnabled = ref(false);
 
 // 分类数据
 const categories = ref([])
@@ -23,45 +26,71 @@ const error = ref(null)
 // 搜索关键字
 const currentQuery = ref("")
 
+// 排序规则映射
+function getChoiceFromSort(sort) {
+  switch (sort) {
+    case "default": return 1
+    case "newest": return 2
+    case "oldest": return 3
+    case "most_popular": return 4
+    default: return 5
+  }
+}
+
+// 封面图片路径解析
+function getPreviewPath(preview) {
+  // 若为空，返回一个默认图片路径
+  if (preview === 'none') {
+    return '/NewestNotFound.jpg'
+  }
+  return `http://localhost:8080/${preview.replace(/^\/?/, '')}`
+}
+
 // 分类选择
 const selectCatag = (cat) => {
-  form.categoryId = cat.id
+  form.value.tag = cat.name
   fetchCars()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 const clearCategory = () => {
-  form.categoryId = null
+  form.value.tag = null
   fetchCars()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 回车进行搜索
 const onSearchEnter = () => {
-  fetchCars()
+  searchCars()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 点search按钮进行搜索
 const onSubmitForm = () => {
-  fetchCars()
+  searchCars()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 获取分类（后端提供tag信息）
-const fetchCategories = async () => {
+const fetchCategories = async (categoryType = "car") => {
   categoriesLoading.value = true
   try {
-    if (process.env.NODE_ENV === "development") {
-      // 🟡 本地开发时：模拟分类
-      categories.value = [
-        { id: 1, name: "Mazda" },
-        { id: 2, name: "Honda" },
-        { id: 3, name: "Toyota" },
-        { id: 4, name: "Nissan" }
-      ]
+    const res = await axios.get("/api/categories", {params: {category: categoryType}})
+    if (res.data?.status === "success" && Array.isArray(res.data.tags)) {
+      categories.value = res.data.tags.map(tag => ({
+        tagId: tag.tagId,
+        name: tag.tagName
+      }))
     } else {
-      // 🟢 生产环境：调用后端
-      const res = await axios.get("/api/car/categories")
-      categories.value = res.data
+      console.warn("后端返回格式异常:", res.data)
+      categories.value = []
     }
   } catch (err) {
+    console.error("获取标签失败:", err)
     error.value = err.message || "标签获取失败"
     categories.value = []
   } finally {
@@ -69,42 +98,75 @@ const fetchCategories = async () => {
   }
 }
 
-// 获取涂装资源（后端提供）
+// 获取车辆模组资源（后端提供）
 const fetchCars = async () => {
   loading.value = true
   error.value = null
   try {
-    if (process.env.NODE_ENV === "development") {
-      // 模拟数据
-      cars.value = [
-        {
-          id: 2,
-          url: "/Cars/MX5_ND_ShirsuAzusa_track_day",
-          thumb: "NewestNotFound.jpg",
-          name: "模拟车辆模组资源 1",
-          views: 123,
-          likes: 114,
-          download: 514,
-          createAt: "2025-09-17"
-        },
-        {
-          id: 1,
-          url: "/Cars/example.com/2",
-          thumb: "NewestNotFound.jpg",
-          name: "模拟车辆模组资源 2",
-          views: 456,
-          likes: 1919,
-          download: 810,
-          createAt: "2025-09-16"
-        }
-      ]
+    const params = {
+      tag: form.value.tag ?? "",
+      choice: getChoiceFromSort(form.value.sort)
+    }
+    const res = await axios.get("/api/source/get_cars", { params })
+    if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+      cars.value = res.data.data.map((item, index) => ({
+        id: index + 1,
+        carName: item.carName,
+        carAvatar: getPreviewPath(item.carAvatar),
+        linkURL: item.linkURL,
+        views: item.views,
+        likes: item.likes,
+        downloads: item.downloads,
+        createdAt: item.createdAt
+      }))
     } else {
-      // 真正请求后端
-      const res = await axios.get("/api/cars", { params: { ...form } })
-      cars.value = res.data
+        cars.value = []
+        console.warn("get_cars 返回格式异常", res.data)
+      }
+  } catch (err) {
+    console.error("获取车辆模组失败:", err)
+    error.value = err.message || "获取车辆模组失败"
+    cars.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// 搜索获取涂装
+const searchCars = async () => {
+  const keyword = currentQuery.value.trim()
+  if (!keyword) {
+    // 空搜索 → 显示默认涂装
+    await fetchCars()
+    return
+  }
+  loading.value = true
+  error.value = null
+  try {
+    const payload = {
+      tag: form.value.tag ?? "",
+      choice: getChoiceFromSort(form.value.sort),
+      search: keyword
+    }
+    const res = await axios.post("/api/source/search/car", payload)
+    if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+      cars.value = res.data.data.map((item, index) => ({
+        id: index + 1,
+        carName: item.carName,
+        carAvatar: getPreviewPath(item.carAvatar),
+        linkURL: item.linkURL,
+        views: item.views,
+        likes: item.likes,
+        downloads: item.downloads,
+        createdAt: item.createdAt
+      }))
+    } else {
+      cars.value = []
+      console.warn("search 接口返回异常", res.data)
     }
   } catch (err) {
-    error.value = err.message || "未知错误"
+    console.error("搜索失败:", err)
+    error.value = err.message || "搜索失败"
     cars.value = []
   } finally {
     loading.value = false
@@ -129,7 +191,7 @@ onMounted( () => {
             <img src="../../components/icons/CarP.jpg" alt="LOGO" class="setting__img" />
             <p>这里是由Y.Z.Ben自制或修改的车辆模组，禁止商用</p>
           </div>
-          <form class="setting__sv" name="car sort" action="/car/Search">
+          <form class="setting__sv" name="car sort" action="/Car/Search">
             <div class="form_group">
               <label for="s">排序规则</label>
               <el-select v-model="form.sort" placeholder="排序规则" style="width: 100%" class="select-option" :teleported="false">
@@ -144,7 +206,7 @@ onMounted( () => {
                 <button
                     type="button"
                     class="category-chip"
-                    :class="{ active: form.categoryId === null }"
+                    :class="{ active: form.tag === null }"
                     @click="clearCategory">
                   <el-icon><Medal /></el-icon>
                   全部</button>
@@ -154,10 +216,10 @@ onMounted( () => {
                 <template v-else>
                   <button
                       v-for="cat in categories"
-                      :key="cat.id"
+                      :key="cat.tagId"
                       type="button"
                       class="category-chip"
-                      :class="{ active: form.categoryId === cat.id }"
+                      :class="{ active: form.tag === cat.name }"
                       @click="selectCatag(cat)">
                     <el-icon><Medal /></el-icon>
                     <span class="cat-name">{{ cat.name }}</span>
@@ -197,21 +259,21 @@ onMounted( () => {
               <p>呃啊，Azusa找不到你想要的车辆模组，请换个方式查询吧</p>
             </div>
             <!-- 正常涂装资源下载列表 -->
-            <div v-else class="list__grid">
+            <div v-else class="list__grid" :key="listKey" :class="{'fade-in-animation': isTransitionEnabled}">
               <div v-for="car in cars" :key="car.id" class="car__card">
                 <!-- 缩略图 -->
-                <a :href="car.url" target="_blank">
-                  <img :src="car.thumb" :alt="car.title" class="card__thumb" />
+                <a :href="car.linkURL" target="_blank">
+                  <img :src="car.carAvatar" :alt="car.title" class="card__thumb" />
                 </a>
-                <a :href="car.url" target="_blank" class="card__title">
-                  {{ car.name }}
+                <a :href="car.carName" target="_blank" class="card__title">
+                  {{ car.carName }}
                 </a>
                 <!-- 点击数、点赞数、下载数、发布时间等元数据 -->
                 <div class="card__meta">
                   <span>{{ car.views }} clicks</span>
                   <span>{{ car.likes }} likes</span>
-                  <span>{{ car.download }} downloads</span>
-                  <span>{{ car.createAt }}</span>
+                  <span>{{ car.downloads }} downloads</span>
+                  <span>{{ car.createdAt.split('T')[0] }}</span>
                 </div>
               </div>
             </div>
@@ -425,6 +487,10 @@ onMounted( () => {
       }
     }
   }
+}
+
+.fade-in-animation {
+  animation: fadeInBottom 0.5s ease-out 0.5s both;
 }
 
 /* 自定义 el-select 的悬停和过渡 */

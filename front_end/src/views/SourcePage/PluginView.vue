@@ -1,15 +1,18 @@
 <script setup>
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
-import {onMounted, reactive, ref} from "vue";
+import {onMounted, ref} from "vue";
 import { Folder, FolderOpened } from "@element-plus/icons-vue";
 import axios from "axios";
 
 // 表单状态（排序规则 & 分类tags）
-const form = reactive({
+const form = ref({
   sort: "default",
-  categoryId: null
+  tag: null
 })
+
+const listKey = ref(0)
+const isTransitionEnabled = ref(false);
 
 // 分类数据
 const categories = ref([])
@@ -23,42 +26,71 @@ const error = ref(null)
 // 搜索关键字
 const currentQuery = ref("")
 
+// 排序规则映射
+function getChoiceFromSort(sort) {
+  switch (sort) {
+    case "default": return 1
+    case "newest": return 2
+    case "oldest": return 3
+    case "most_popular": return 4
+    default: return 5
+  }
+}
+
+// 封面图片路径解析
+function getPreviewPath(preview) {
+  // 若为空，返回一个默认图片路径
+  if (preview === 'none') {
+    return '/NewestNotFound.jpg'
+  }
+  return `http://localhost:8080/${preview.replace(/^\/?/, '')}`
+}
+
 // 分类选择
 const selectCatag = (cat) => {
-  form.categoryId = cat.id
+  form.tag = cat.name
   fetchPlugins()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 const clearCategory = () => {
-  form.categoryId = null
+  form.tag = null
   fetchPlugins()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 回车进行搜索
 const onSearchEnter = () => {
   fetchPlugins()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 点search按钮进行搜索
 const onSubmitForm = () => {
   fetchPlugins()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 获取分类（后端提供tag信息）
-const fetchCategories = async () => {
+const fetchCategories = async (categoryType = "plugin") => {
   categoriesLoading.value = true
   try {
-    if (process.env.NODE_ENV === "development") {
-      // 🟡 本地开发时：模拟分类
-      categories.value = [
-        { id: 1, name: "Azusa_Guider" }
-      ]
+    const res = await axios.get("/api/categories", {params: {category: categoryType}})
+    if (res.data?.status === "success" && Array.isArray(res.data.tags)) {
+      categories.value = res.data.tags.map(tag => ({
+        tagId: tag.tagId,
+        name: tag.tagName
+      }))
     } else {
-      // 🟢 生产环境：调用后端
-      const res = await axios.get("/api/plugin/categories")
-      categories.value = res.data
+      console.warn("后端返回格式异常:", res.data)
+      categories.value = []
     }
   } catch (err) {
+    console.error("获取标签失败:", err)
     error.value = err.message || "标签获取失败"
     categories.value = []
   } finally {
@@ -66,42 +98,34 @@ const fetchCategories = async () => {
   }
 }
 
-// 获取涂装资源（后端提供）
+// 获取插件资源（后端提供）
 const fetchPlugins = async () => {
   loading.value = true
   error.value = null
   try {
-    if (process.env.NODE_ENV === "development") {
-      // 模拟数据
-      plugins.value = [
-        {
-          id: 2,
-          url: "https://github.com/ShirasuAzusa0",
-          thumb: "NewestNotFound.jpg",
-          name: "模拟插件资源 1",
-          views: 123,
-          likes: 114,
-          download: 514,
-          createAt: "2025-09-17"
-        },
-        {
-          id: 1,
-          url: "https://github.com/ShirasuAzusa0",
-          thumb: "NewestNotFound.jpg",
-          name: "模拟插件资源 2",
-          views: 456,
-          likes: 1919,
-          download: 810,
-          createAt: "2025-09-16"
-        }
-      ]
+    const params = {
+      tag: form.value.tag ?? "",
+      choice: getChoiceFromSort(form.value.sort)
+    }
+    const res = await axios.get("/api/source/get_plugins", { params })
+    if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+      plugins.value = res.data.data.map((item, index) => ({
+        id: index + 1,
+        pluginName: item.pluginName,
+        pluginAvatar: getPreviewPath(item.pluginAvatar),
+        linkURL: item.linkURL,
+        views: item.views,
+        likes: item.likes,
+        downloads: item.downloads,
+        createdAt: item.createdAt
+      }))
     } else {
-      // 真正请求后端
-      const res = await axios.get("/api/plugins", { params: { ...form } })
-      plugins.value = res.data
+      plugins.value = []
+      console.warn("get_cars 返回格式异常", res.data)
     }
   } catch (err) {
-    error.value = err.message || "未知错误"
+    console.error("获取插件失败:", err)
+    error.value = err.message || "获取插件失败"
     plugins.value = []
   } finally {
     loading.value = false
@@ -141,11 +165,11 @@ onMounted( () => {
                 <button
                     type="button"
                     class="category-chip"
-                    :class="{ active: form.categoryId === null }"
+                    :class="{ active: form.tag === null }"
                     @click="clearCategory">
                   <!-- 动态切换图标 -->
                   <el-icon>
-                    <FolderOpened v-if="form.categoryId === null" />
+                    <FolderOpened v-if="form.tag === null" />
                     <Folder v-else />
                   </el-icon>
                   全部</button>
@@ -158,11 +182,11 @@ onMounted( () => {
                       :key="cat.id"
                       type="button"
                       class="category-chip"
-                      :class="{ active: form.categoryId === cat.id }"
+                      :class="{ active: form.tag === cat.id }"
                       @click="selectCatag(cat)">
                     <!-- 动态切换图标 -->
                     <el-icon>
-                      <FolderOpened v-if="form.categoryId === cat.id" />
+                      <FolderOpened v-if="form.tag === cat.id" />
                       <Folder v-else />
                     </el-icon>
                     <span class="cat-name">{{ cat.name }}</span>
@@ -202,21 +226,21 @@ onMounted( () => {
               <p>呃啊，Azusa找不到你想要的插件，请换个方式查询吧</p>
             </div>
             <!-- 正常涂装资源下载列表 -->
-            <div v-else class="list__grid">
+            <div v-else class="list__grid" :key="listKey" :class="{'fade-in-animation': isTransitionEnabled}">
               <div v-for="plugin in plugins" :key="plugin.id" class="plugin__card">
                 <!-- 缩略图 -->
-                <a :href="plugin.url" target="_blank">
-                  <img :src="plugin.thumb" :alt="plugin.title" class="card__thumb" />
+                <a :href="plugin.linkURL" target="_blank">
+                  <img :src="plugin.pluginAvatar" :alt="plugin.title" class="card__thumb" />
                 </a>
-                <a :href="plugin.url" target="_blank" class="card__title">
-                  {{ plugin.name }}
+                <a :href="plugin.pluginName" target="_blank" class="card__title">
+                  {{ plugin.pluginName }}
                 </a>
                 <!-- 点击数、点赞数、下载数、发布时间等元数据 -->
                 <div class="card__meta">
                   <span>{{ plugin.views }} clicks</span>
                   <span>{{ plugin.likes }} likes</span>
-                  <span>{{ plugin.download }} downloads</span>
-                  <span>{{ plugin.createAt }}</span>
+                  <span>{{ plugin.downloads }} downloads</span>
+                  <span>{{ plugin.createdAt.split('T')[0] }}</span>
                 </div>
               </div>
             </div>
@@ -430,6 +454,10 @@ onMounted( () => {
       }
     }
   }
+}
+
+.fade-in-animation {
+  animation: fadeInBottom 0.5s ease-out 0.5s both;
 }
 
 /* 自定义 el-select 的悬停和过渡 */

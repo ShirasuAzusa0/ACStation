@@ -31,14 +31,34 @@
     el.scrollIntoView({behavior: 'smooth', block: 'start'})
   }
 
+  function getPreviewPath(preview) {
+    // 若为空，返回一个默认图片路径
+    if (preview === 'none') {
+      return '/NewestNotFound.jpg'
+    }
+    // 若图片路径以http或https开头，直接返回
+    if (preview.startsWith('http') || preview.startsWith('https')) {
+      // 如果是 B 站图片，使用更稳定的处理方式
+      if (preview.includes('bilibili.com') || preview.includes('hdslb.com')) {
+        // 使用images.weserv.nl代理
+        return `https://images.weserv.nl?url=${encodeURIComponent(preview)}`;
+      }
+      return preview
+    }
+    // 若图片来自本地后端
+    else {
+      return `http://localhost:8080/${preview.replace(/^\/?/, '')}`
+    }
+  }
+
   const newest = ref([])
   // 固定 5 张卡片（回退用）
   const fallbackNewest = [
-    {id: 1, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg"},
-    {id: 2, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg"},
-    {id: 3, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg"},
-    {id: 4, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg"},
-    {id: 5, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg"}
+    {id: 1, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg", url: "/Home"},
+    {id: 2, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg", url: "/Home"},
+    {id: 3, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg", url: "/Home"},
+    {id: 4, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg", url: "/Home"},
+    {id: 5, name: "Oh no!", info: "Azusa can't find the newest for you", img: "/NewestNotFound.jpg", url: "/Home"}
   ]
 
   // 统一展示用的数据（优先使用后端，否则回退）
@@ -49,9 +69,19 @@
   onMounted(async () => {
     try {
       const res = await axios.get("/api/newest")
-      if (Array.isArray(res.data) && res.data.length > 0) {
+      if (res.data.status === "success" && Array.isArray(res.data.data) && res.data.data.length > 0) {
         // 把后端返回的数组赋值
-        newest.value = res.data
+        newest.value = res.data.data.map((item, index) => ({
+          id: index + 1,
+          name: item.name,
+          info: item.description,
+          img: getPreviewPath(item.preview),
+          url: item.url
+        }))
+      } else {
+        console.warn("后端未返回有效数据，使用回退数据");
+        // 保持为空 → 自动走 fallback
+        newest.value = [];
       }
     } catch (err) {
       console.error("获取轮播图失败：", err)
@@ -441,19 +471,30 @@
     position: relative;
     border-radius: 12px;
     overflow: hidden;
-    cursor: pointer; /* 可选：提升交互感 */
+    cursor: pointer;        /* 可选：提升交互感 */
+    display: flex;          /* CHANGED: 使用 flex 居中图片 */
+    align-items: center;    /* CHANGED: 垂直居中图片 */
+    justify-content: center;/* CHANGED: 水平居中图片 */
   }
 
   &__figure img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: filter 0.25s ease;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;    /* CHANGED: 关键：完整可见 */
+    object-position: center;
+    display: block;
+    transition: transform 0.28s ease;
+    filter: none !important; /* CHANGED: 确保默认不半透明/不变暗 */
+    opacity: 1 !important;
+
   }
 
   /* 悬停时效果 */
   &__img.hovered {
     filter: brightness(50%);
+    transform: scale(1.05);         /* 悬浮时轻微放大 */
     transition: filter 0.25s ease;
   }
 
@@ -555,19 +596,46 @@
 
 /* 如果轮播项底部文字仍被背景干扰，保证名字区有背景 */
 .carousel__name {
-  display:inline-block;
-  background: rgba(0,0,0,0.6);
+  display: block;
+  max-width: 100%;        /* 限制宽度，不会贴边 */
+  white-space: normal;    /* 允许换行 */
+  word-break: break-word; /* 对长单词或无空格字符串也断行 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: rgba(0, 0, 0, 0.65);
   color: #fff;
-  padding: .25rem .6rem;
-  border-radius: 6px;
-  margin-top: .5rem;
-  z-index: 20;
+  padding: 0.1rem 0.1rem;
+  border-radius: 8px;
+  margin: 0;
+  line-height: 1.3;
 }
 
 /* 确保箭头不会被轮播卡片遮盖（提高 z-index） */
 :deep .custom-carousel .el-carousel__arrow,
 :deep .custom-carousel .el-carousel__indicators {
   pointer-events: auto;
+}
+
+/* 允许 Element Plus 内部容器溢出（确保箭头和溢出项可见） */
+:deep(.el-carousel__container) {
+  overflow: visible !important;
+}
+
+:deep(.el-carousel__item) {
+  transition: transform 0.4s ease, z-index 0.4s ease, box-shadow 0.3s ease;
+  border-radius: 16px;
+}
+
+/* 当前激活项突出 */
+:deep(.el-carousel__item.is-active) {
+  transform: scale(1.05) translateY(-8px);
+  z-index: 10;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* 非当前项轻微缩小 */
+:deep(.el-carousel__item:not(.is-active)) {
+  transform: scale(0.92);
 }
 
 /* 可选：在移动端缩小箭头与指示器尺寸 */

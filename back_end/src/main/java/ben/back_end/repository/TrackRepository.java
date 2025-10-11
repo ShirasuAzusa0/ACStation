@@ -13,10 +13,18 @@ public interface TrackRepository extends JpaRepository<Tracks, Integer> {
     @Query(value = """
             SELECT tracks.*
             FROM tracks
-            JOIN tags ON tracks.trackId = tags.track_id
-            WHERE tags.tagName = :tag
+            WHERE tracks.trackId != 0
+             AND (
+               (:tag IS NULL OR :tag = '')
+               OR tracks.trackId IN (
+                   SELECT tag_relationships.track_id
+                   FROM tag_relationships
+                   JOIN tags ON tags.tagId = tag_relationships.tag_id
+                   WHERE tags.tagName = :tag
+               )
+             )
             AND (
-                    tracks.trackName REGEXP :regex
+                    tracks.trackModName REGEXP :regex
                     OR tracks.description REGEXP :regex
                 )
             ORDER BY
@@ -41,9 +49,9 @@ public interface TrackRepository extends JpaRepository<Tracks, Integer> {
     @Query(value = """
         SELECT tracks.*
         FROM tracks
-        JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND tracks.trackId != 0
         ORDER BY tracks.trackId ASC;
         """, nativeQuery = true)
@@ -53,9 +61,9 @@ public interface TrackRepository extends JpaRepository<Tracks, Integer> {
     @Query(value = """
         SELECT tracks.*
         FROM tracks
-        JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND tracks.trackId != 0
         ORDER BY tracks.createdAt ASC;
         """, nativeQuery = true)
@@ -65,9 +73,9 @@ public interface TrackRepository extends JpaRepository<Tracks, Integer> {
     @Query(value = """
         SELECT tracks.*
         FROM tracks
-        JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND tracks.trackId != 0
         ORDER BY tracks.createdAt DESC;
         """, nativeQuery = true)
@@ -77,9 +85,9 @@ public interface TrackRepository extends JpaRepository<Tracks, Integer> {
     @Query(value = """
         SELECT tracks.*
         FROM tracks
-        JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON tracks.trackId = tag_relationships.track_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND tracks.trackId != 0
         ORDER BY tracks.views DESC;
         """, nativeQuery = true)

@@ -1,30 +1,30 @@
-// Pinia 用户仓库
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
 
-export const useUserStore = defineStore('user', () => {
-    const user = ref(null)      // { name, avatar }
-    const token = ref(null)
-
-    function setUser(u, t) {
-        user.value = u
-        token.value = t
-        localStorage.setItem('user', JSON.stringify(u))
-        localStorage.setItem('token', t)
+export const useUserStore = defineStore('user', {
+    state: () => ({
+        user: null,
+        token: ''
+    }),
+    actions: {
+        setUser(user, token) {
+            this.user = user
+            this.token = token
+            localStorage.setItem('user', JSON.stringify(user))
+            localStorage.setItem('token', token)
+        },
+        logout() {
+            this.user = null
+            this.token = ''
+            localStorage.removeItem('user')
+            localStorage.removeItem('token')
+        },
+        loadFromStorage() {
+            const user = localStorage.getItem('user')
+            const token = localStorage.getItem('token')
+            if (user && token) {
+                this.user = JSON.parse(user)
+                this.token = token
+            }
+        }
     }
-
-    function logout() {
-        user.value = null
-        token.value = null
-        localStorage.removeItem('user')
-        localStorage.removeItem('token')
-    }
-
-    // 页面刷新时自动恢复登录态
-    if (localStorage.getItem('user')) {
-        user.value = JSON.parse(localStorage.getItem('user'))
-        token.value = localStorage.getItem('token')
-    }
-
-    return { user, token, setUser, logout }
 })

@@ -1,15 +1,18 @@
 <script setup>
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
-import {onMounted, reactive, ref} from "vue";
+import {onMounted, ref} from "vue";
 import { Location } from "@element-plus/icons-vue";
 import axios from "axios";
 
 // 表单状态（排序规则 & 分类tags）
-const form = reactive({
+const form = ref({
   sort: "default",
-  categoryId: null
+  tag: null
 })
+
+const listKey = ref(0)
+const isTransitionEnabled = ref(false);
 
 // 分类数据
 const categories = ref([])
@@ -23,45 +26,71 @@ const error = ref(null)
 // 搜索关键字
 const currentQuery = ref("")
 
+// 排序规则映射
+function getChoiceFromSort(sort) {
+  switch (sort) {
+    case "default": return 1
+    case "newest": return 2
+    case "oldest": return 3
+    case "most_popular": return 4
+    default: return 5
+  }
+}
+
+// 封面图片路径解析
+function getPreviewPath(preview) {
+  // 若为空，返回一个默认图片路径
+  if (preview === 'none') {
+    return '/NewestNotFound.jpg'
+  }
+  return `http://localhost:8080/${preview.replace(/^\/?/, '')}`
+}
+
 // 分类选择
 const selectCatag = (cat) => {
-  form.categoryId = cat.id
+  form.value.tag = cat.id
   fetchTracks()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 const clearCategory = () => {
-  form.categoryId = null
+  form.value.tag = null
   fetchTracks()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 回车进行搜索
 const onSearchEnter = () => {
-  fetchTracks()
+  searchTracks()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 点search按钮进行搜索
 const onSubmitForm = () => {
-  fetchTracks()
+  searchTracks()
+  isTransitionEnabled.value = true;
+  listKey.value = Date.now()
 }
 
 // 获取分类（后端提供tag信息）
-const fetchCategories = async () => {
+const fetchCategories = async (categoryType = "track") => {
   categoriesLoading.value = true
   try {
-    if (process.env.NODE_ENV === "development") {
-      // 🟡 本地开发时：模拟分类
-      categories.value = [
-        { id: 1, name: "China" },
-        { id: 2, name: "GuangZhou" },
-        { id: 3, name: "DongGuan" },
-        { id: 4, name: "ShenZhen" }
-      ]
+    const res = await axios.get("/api/categories", {params: {category: categoryType}})
+    if (res.data?.status === "success" && Array.isArray(res.data.tags)) {
+      categories.value = res.data.tags.map(tag => ({
+        tagId: tag.tagId,
+        name: tag.tagName
+      }))
     } else {
-      // 🟢 生产环境：调用后端
-      const res = await axios.get("/api/track/categories")
-      categories.value = res.data
+      console.warn("后端返回格式异常:", res.data)
+      categories.value = []
     }
   } catch (err) {
+    console.error("获取标签失败:", err)
     error.value = err.message || "标签获取失败"
     categories.value = []
   } finally {
@@ -69,42 +98,75 @@ const fetchCategories = async () => {
   }
 }
 
-// 获取涂装资源（后端提供）
+// 获取赛道模组资源（后端提供）
 const fetchTracks = async () => {
   loading.value = true
   error.value = null
   try {
-    if (process.env.NODE_ENV === "development") {
-      // 模拟数据
-      tracks.value = [
-        {
-          id: 2,
-          url: "/Tracks/FangCun_kart_circuit",
-          thumb: "NewestNotFound.jpg",
-          name: "模拟赛道模组资源 1",
-          views: 123,
-          likes: 114,
-          download: 514,
-          createAt: "2025-09-17"
-        },
-        {
-          id: 1,
-          url: "/Tracks/example.com/2",
-          thumb: "NewestNotFound.jpg",
-          name: "模拟赛道模组资源 2",
-          views: 456,
-          likes: 1919,
-          download: 810,
-          createAt: "2025-09-16"
-        }
-      ]
+    const params = {
+      tag: form.value.tag ?? "",
+      choice: getChoiceFromSort(form.value.sort)
+    }
+    const res = await axios.get("/api/source/get_tracks", { params })
+    if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+      tracks.value = res.data.data.map((item, index) => ({
+        id: index + 1,
+        trackName: item.trackName,
+        trackAvatar: getPreviewPath(item.trackAvatar),
+        linkURL: item.linkURL,
+        views: item.views,
+        likes: item.likes,
+        downloads: item.downloads,
+        createdAt: item.createdAt
+      }))
     } else {
-      // 真正请求后端
-      const res = await axios.get("/api/tracks", { params: { ...form } })
-      tracks.value = res.data
+      tracks.value = []
+      console.warn("get_tracks 返回格式异常", res.data)
     }
   } catch (err) {
-    error.value = err.message || "未知错误"
+    console.error("获取赛道模组失败:", err)
+    error.value = err.message || "获取赛道模组失败"
+    tracks.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// 搜索获取赛道模组
+const searchTracks = async () => {
+  const keyword = currentQuery.value.trim()
+  if (!keyword) {
+    // 空搜索 → 显示默认涂装
+    await fetchTracks()
+    return
+  }
+  loading.value = true
+  error.value = null
+  try {
+    const payload = {
+      tag: form.value.tag ?? "",
+      choice: getChoiceFromSort(form.value.sort),
+      search: keyword
+    }
+    const res = await axios.post("/api/source/search/track", payload)
+    if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+      tracks.value = res.data.data.map((item, index) => ({
+        id: index + 1,
+        trackModName: item.trackModName,
+        trackAvatar: getPreviewPath(item.trackAvatar),
+        linkURL: item.linkURL,
+        views: item.views,
+        likes: item.likes,
+        downloads: item.downloads,
+        createdAt: item.createdAt
+      }))
+    } else {
+      tracks.value = []
+      console.warn("search 接口返回异常", res.data)
+    }
+  } catch (err) {
+    console.error("搜索失败:", err)
+    error.value = err.message || "搜索失败"
     tracks.value = []
   } finally {
     loading.value = false
@@ -144,7 +206,7 @@ onMounted( () => {
                 <button
                     type="button"
                     class="category-chip"
-                    :class="{ active: form.categoryId === null }"
+                    :class="{ active: form.tag === null }"
                     @click="clearCategory">
                   <el-icon><Location /></el-icon>
                   全部</button>
@@ -154,10 +216,10 @@ onMounted( () => {
                 <template v-else>
                   <button
                       v-for="cat in categories"
-                      :key="cat.id"
+                      :key="cat.tagId"
                       type="button"
                       class="category-chip"
-                      :class="{ active: form.categoryId === cat.id }"
+                      :class="{ active: form.tag === cat.name }"
                       @click="selectCatag(cat)">
                     <el-icon><Location /></el-icon>
                     <span class="cat-name">{{ cat.name }}</span>
@@ -197,21 +259,21 @@ onMounted( () => {
               <p>呃啊，Azusa找不到你想要的车辆模组，请换个方式查询吧</p>
             </div>
             <!-- 正常涂装资源下载列表 -->
-            <div v-else class="list__grid">
+            <div v-else class="list__grid" :key="listKey" :class="{'fade-in-animation': isTransitionEnabled}">
               <div v-for="track in tracks" :key="track.id" class="track__card">
                 <!-- 缩略图 -->
-                <a :href="track.url" target="_blank">
-                  <img :src="track.thumb" :alt="track.title" class="card__thumb" />
+                <a :href="track.linkURL" target="_blank">
+                  <img :src="track.trackAvatar" :alt="track.title" class="card__thumb" />
                 </a>
-                <a :href="track.url" target="_blank" class="card__title">
-                  {{ track.name }}
+                <a :href="track.trackName" target="_blank" class="card__title">
+                  {{ track.trackName }}
                 </a>
                 <!-- 点击数、点赞数、下载数、发布时间等元数据 -->
                 <div class="card__meta">
                   <span>{{ track.views }} clicks</span>
                   <span>{{ track.likes }} likes</span>
-                  <span>{{ track.download }} downloads</span>
-                  <span>{{ track.createAt }}</span>
+                  <span>{{ track.downloads }} downloads</span>
+                  <span>{{ track.createdAt.split('T')[0] }}</span>
                 </div>
               </div>
             </div>
@@ -425,6 +487,10 @@ onMounted( () => {
       }
     }
   }
+}
+
+.fade-in-animation {
+  animation: fadeInBottom 0.5s ease-out 0.5s both;
 }
 
 /* 自定义 el-select 的悬停和过渡 */

@@ -1,105 +1,182 @@
 <script setup>
-import {User, Lock, Key} from '@element-plus/icons-vue'
-import { ref } from 'vue'
-import { useRouter } from "vue-router"
+import {User, Lock, Key, Message} from '@element-plus/icons-vue'
+import {ref, onMounted} from 'vue'
+import {useRouter} from "vue-router"
 import axios from "axios"
 import { useUserStore } from '@/stores/user'
 import {ElMessage} from "element-plus";
 
-const username = ref('')
+const userName = ref('')
+const email = ref('')
 const password = ref('')
 const captcha = ref('')
-// 模拟验证码图片 URL
-const captchaUrl = ref('/api/captcha?time' + Date.now())
-// 点击刷新验证码
-const refreshCaptcha = () => {
-  captchaUrl.value = '/api/captcha?time' + Date.now()
-}
+
+// 从后端获取验证码和对应编号
+const captchaImage = ref('')
+const captchaKey = ref('')
 
 const userStore = useUserStore()
-
 const router = useRouter()
 
-const SignUp = async () => {
-  try {
-    const res = await axios.post('/api/auth/register', {
-      username: username.value,
-      password: password.value,
-      captcha: captcha.value
-    }, {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-    // 假设后端返回 { token, user: { name, avatar } }
-    userStore.setUser(res.data.user, res.data.token)
-    ElMessage.success("注册成功，欢迎你，" + res.data.user.name)
-    await router.push("/Home")
-  } catch (err) {
-    ElMessage.error(err.response?.data?.message || "注册失败")
+// 动态加载 JSEncrypt （用于PKCS#1 v1.5加密）
+function loadJSEncrypt() {
+  return new Promise((resolve, reject) => {
+    if (window.JSEncrypt) return resolve(window.JSEncrypt)
+    const src = 'https://cdn.bootcdn.net/ajax/libs/jsencrypt/3.0.0-rc.1/jsencrypt.min.js'
+    const s = document.createElement('script')
+    s.src = src
+    s.onload = () => {
+      if(window.JSEncrypt) resolve(window.JSEncrypt)
+      else reject(new Error('JSEncrypt not available after script load'))
+    }
+    s.onerror = (e) => reject(new Error('Failed to load JSEncrypt: ' + e.message))
+    document.head.appendChild(s)
+  })
+}
+
+// Base64 -> PEM
+function b64TOpem(b64) {
+  const chunks = b64.match(/.{1,64}/g) || [b64]
+  return `-----BEGIN PUBLIC KEY-----\n${chunks.join('\n')}\n-----END PUBLIC KEY-----`
+}
+
+// 从后端获取公钥（Base64），返回PEM格式字符串
+async function fetchPublicKeyPEM() {
+  const res = await axios.get('/api/key')
+  if(res.data && res.data.public_key) {
+    return b64TOpem(res.data.public_key)
+  } else {
+    throw new Error('从 /api/key 获取公钥失败，返回数据：' + JSON.stringify(res.data))
   }
 }
 
+// 公钥加密，返回 base64 字符串
+async function encryptPassword(rawPassword) {
+  await loadJSEncrypt()
+  const pem = await fetchPublicKeyPEM()
+  const encryptor = new window.JSEncrypt()
+  encryptor.setPublicKey(pem)
+  const encrypted = encryptor.encrypt(rawPassword)
+  if (!encrypted) throw new Error('密码加密失败')
+  return encrypted
+}
+
+// 获取验证码（key+image）
+async function fetchCaptcha() {
+  try {
+    const res = await axios.get('/api/captcha')
+    if (res.data && res.data.key && res.data.image) {
+      captchaImage.value = res.data.image.startsWith('data:') ? res.data.image : `data:image/png;base64,${res.data.image}`
+      captchaKey.value = res.data.key
+    } else {
+      console.error('验证码接口返回异常：', res.data)
+    }
+  } catch (err) {
+    console.error('获取验证码失败：', err)
+  }
+}
+
+// 点击刷新验证码
+const refreshCaptcha = async() => {
+  await fetchCaptcha()
+}
+
+// 页面加载时先获取验证码
+onMounted(() => {
+  fetchCaptcha()
+})
+
+// 注册（发送userName, account, password, captcha, captchaKey）
+const SignUp = async () => {
+  try {
+    if (!email.value || !userName.value || !password.value) {
+      console.warn('账号、用户名或密码为空')
+      ElMessage.error('账号、用户名或密码为空')
+    }
+
+    // 加密密码
+    const encryptedPassword = await encryptPassword(password.value)
+
+    // 发送登录请求到后端
+    const payload = {
+      userName: userName.value,
+      account: email.value,
+      password: encryptedPassword,
+      captcha: captcha.value,
+      captchaKey: captchaKey.value,
+    }
+
+    const res = await axios.post('/api/auth/register', payload)
+
+    if (res.data && (res.data.status === 'success' || res.status === '200')) {
+      const d = res.data.data || {}
+      userStore.setUser({username: d.username, userId: d.userId, avatar: d.avatar}, d.token)
+      await router.push("/Home")
+      ElMessage.success('注册成功，welcome to ACStation!')
+    } else {
+      console.error('注册失败：', res.data)
+      ElMessage.error('注册失败')
+    }
+  } catch (err) {
+    console.error('注册流程异常：', err)
+  }
+}
+
+// 登录（跳转）
 const SignIn = async () => {
   try {
-    const res = await axios.post('/api/auth/login', {
-      username: username.value,
-      password: password.value,
-      captcha: captcha.value
-    }, {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-    userStore.setUser(res.data.user, res.data.token)
-    ElMessage.success("登录成功，欢迎你，" + res.data.user.name)
-    await router.push("/Home")
+    await router.push("/Welcome/Sign-In")
   } catch (err) {
-    ElMessage.error(err.response?.data?.message || "登录失败")
+    console.error('注册跳转流程异常：', err)
   }
 }
 </script>
 
 <template>
-  <div class="LogIn__container">
-    <div class="LogIn__desc">
-      <h1>登录</h1>
+  <div class="SignUp__container">
+    <div class="SignUp__desc">
+      <h1>注册</h1>
       <p class="desc__dp1">“I just do my own thing, and what others say has nothing to do with me.”</p>
       <p class="desc__dp2">————Kimi Raikkonen</p>
     </div>
-    <div class="LogIn__table">
-      <el-input v-model="username" placeholder="用户名/邮箱">
+    <div class="SignUp__table">
+      <el-input v-model="userName" placeholder="用户名">
         <template #prefix>
-          <el-icon><User /></el-icon>
+          <el-icon color="black"><User /></el-icon>
+        </template>
+      </el-input>
+      <el-input v-model="email" style="margin-top: 10px" placeholder="邮箱">
+        <template #prefix>
+          <el-icon color="black"><Message /></el-icon>
         </template>
       </el-input>
       <el-input v-model="password" type="password" style="margin-top: 10px" placeholder="密码" show-password>
         <template #prefix>
-          <el-icon><Lock /></el-icon>
+          <el-icon color="black"><Lock /></el-icon>
         </template>
       </el-input>
-      <div class="LogIn__captcha">
+      <div class="SignUp__captcha">
         <el-input v-model="captcha" class="captcha__input" placeholder="验证码">
           <template #prefix>
-            <el-icon><Key /></el-icon>
+            <el-icon color="black"><Key /></el-icon>
           </template>
         </el-input>
-        <img :src="captchaUrl" alt="验证码" class="captcha__img" @click="refreshCaptcha" />
+        <img :src="captchaImage" alt="验证码" class="captcha__img" @click="refreshCaptcha" />
       </div>
     </div>
-    <div class="LogIn__buttons">
-      <div class="LogIn__btn1">
-        <el-button style="width: 400px" class="btn__success" plain @click="SignUp">立即登录</el-button>
+    <div class="SignUp__buttons">
+      <div class="signUp__btn1">
+        <el-button style="width: 400px" class="btn__success" plain @click="SignUp">立即注册</el-button>
       </div>
-      <div class="LogIn__btn2">
-        <el-button style="width: 400px" class="btn__warning" plain @click="SignIn">没有账号？注册一个吧</el-button>
+      <div class="SignUp__btn2">
+        <el-button style="width: 400px" class="btn__warning" plain @click="SignIn">已有账号？跳转登录</el-button>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.LogIn {
+.SignUp {
 
   &__container {
     display: flex;

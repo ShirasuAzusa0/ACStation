@@ -13,10 +13,16 @@ public interface VideoRepository extends JpaRepository<Videos, Integer> {
     @Query(value = """
             SELECT videos.*
             FROM videos
-            JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
-            JOIN tags ON tags.tagId = tag_relationships.tag_id
-            WHERE tags.tagName = :tag
-            AND videos.videoId != 0
+            WHERE videos.videoId != 0
+             AND (
+               (:tag IS NULL OR :tag = '')
+               OR videos.videoId IN (
+                   SELECT tag_relationships.video_id
+                   FROM tag_relationships
+                   JOIN tags ON tags.tagId = tag_relationships.tag_id
+                   WHERE tags.tagName = :tag
+               )
+             )
             AND (
                 videos.videoTitle REGEXP :regex
                 OR videos.description REGEXP :regex
@@ -43,9 +49,9 @@ public interface VideoRepository extends JpaRepository<Videos, Integer> {
     @Query(value = """
         SELECT videos.*
         FROM videos
-        JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND videos.videoId != 0
         ORDER BY videos.videoId ASC;
         """, nativeQuery = true)
@@ -55,9 +61,9 @@ public interface VideoRepository extends JpaRepository<Videos, Integer> {
     @Query(value = """
         SELECT videos.*
         FROM videos
-        JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND videos.videoId != 0
         ORDER BY videos.createdAt ASC;
         """, nativeQuery = true)
@@ -67,9 +73,9 @@ public interface VideoRepository extends JpaRepository<Videos, Integer> {
     @Query(value = """
         SELECT videos.*
         FROM videos
-        JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND videos.videoId != 0
         ORDER BY videos.createdAt DESC;
         """, nativeQuery = true)
@@ -79,9 +85,9 @@ public interface VideoRepository extends JpaRepository<Videos, Integer> {
     @Query(value = """
         SELECT videos.*
         FROM videos
-        JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
-        JOIN tags ON tag_relationships.tag_id = tags.tagId
-        WHERE tags.tagName = :tag
+        LEFT JOIN tag_relationships ON videos.videoId = tag_relationships.video_id
+        LEFT JOIN tags ON tag_relationships.tag_id = tags.tagId
+        WHERE (tags.tagName = :tag OR :tag IS NULL OR :tag = '')
           AND videos.videoId != 0
         ORDER BY videos.views DESC;
         """, nativeQuery = true)

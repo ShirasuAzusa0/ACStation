@@ -35,3 +35,9 @@ build/
 ### RSA key ###
 /src/main/java/ben/back_end/key/
 *.pem
+
+### 资源文件 ###
+/src/main/resource/
+*zip
+*jpg
+*png

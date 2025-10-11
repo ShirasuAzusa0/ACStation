@@ -14,7 +14,7 @@ public class PluginService {
 
     // 根据搜索和筛选tag查找相关视频信息实体
     public List<Plugins> getPluginBySearch(String tag, int choice, String search) {
-        if (tag == null || tag.trim().isEmpty() || search == null || search.trim().isEmpty()) {
+        if (search == null || search.trim().isEmpty()) {
             throw new IllegalArgumentException("Invalid search");
         }
         String[] parts = search.split(" ");
