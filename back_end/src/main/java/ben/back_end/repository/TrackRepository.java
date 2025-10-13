@@ -1,8 +1,10 @@
 package ben.back_end.repository;
 
 import ben.back_end.entity.Tracks;
+import jakarta.transaction.Transactional;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -108,4 +110,68 @@ public interface TrackRepository extends JpaRepository<Tracks, Integer> {
         WHERE tracks.trackModName = :trackModName;
         """, nativeQuery = true)
     Tracks findTrackByModName(String trackModName);
+
+    // 通过名称更新点击量
+    @Query(value = """
+        UPDATE tracks
+        SET views = views + 1
+        WHERE trackModName = :trackModName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void updateViewsByName(String trackModName);
+
+    // 通过名称获取点击量
+    @Query(value = """
+        SELECT tracks.views
+        FROM tracks
+        WHERE tracks.trackModName = :trackModName;
+        """, nativeQuery = true)
+    int getViewsByName(String trackModName);
+
+    // 通过名称点赞数+1
+    @Query(value = """
+        UPDATE tracks
+        SET likes = likes + 1
+        WHERE trackModName = :trackModName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void addLikesByName(String trackModName);
+
+    // 通过名称点赞数-1
+    @Query(value = """
+        UPDATE tracks
+        SET likes = likes - 1
+        WHERE trackModName = :trackModName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void removeLikesByName(String trackModName);
+
+    // 通过名称获取点赞数
+    @Query(value = """
+        SELECT tracks.likes
+        FROM tracks
+        WHERE tracks.trackModName = :trackModName;
+        """, nativeQuery = true)
+    int getLikesByName(String trackModName);
+
+    // 通过名称下载数+1
+    @Query(value = """
+        UPDATE tracks
+        SET downloads = downloads + 1
+        WHERE trackModName = :trackModName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void addDownloadsByName(String trackModName);
 }

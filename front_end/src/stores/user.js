@@ -19,11 +19,20 @@ export const useUserStore = defineStore('user', {
             localStorage.removeItem('token')
         },
         loadFromStorage() {
-            const user = localStorage.getItem('user')
-            const token = localStorage.getItem('token')
-            if (user && token) {
-                this.user = JSON.parse(user)
-                this.token = token
+            try {
+                const user = localStorage.getItem('user')
+                const token = localStorage.getItem('token')
+                if (user && token) {
+                    this.user = JSON.parse(user)
+                    this.token = token
+                    console.log('用户状态已从存储加载')
+                } else {
+                    console.log('未找到存储的用户状态')
+                }
+            } catch (error) {
+                console.error('加载用户状态失败:', error)
+                // 清除可能损坏的存储
+                this.logout()
             }
         }
     }

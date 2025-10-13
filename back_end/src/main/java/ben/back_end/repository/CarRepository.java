@@ -1,8 +1,10 @@
 package ben.back_end.repository;
 
 import ben.back_end.entity.Cars;
+import jakarta.transaction.Transactional;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -108,4 +110,68 @@ public interface CarRepository extends JpaRepository<Cars, Integer> {
         WHERE cars.carModName = :carModName;
         """, nativeQuery = true)
     Cars findCarByModName(String carModName);
+
+    // 通过名称更新点击量
+    @Query(value = """
+        UPDATE cars
+        SET views = views + 1
+        WHERE carModName = :carModName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void updateViewsByName(String carModName);
+
+    // 通过名称获取点击量
+    @Query(value = """
+        SELECT cars.views
+        FROM cars
+        WHERE cars.carModName = :carModName;
+        """, nativeQuery = true)
+    int getViewsByName(String carModName);
+
+    // 通过名称点赞数+1
+    @Query(value = """
+        UPDATE cars
+        SET likes = likes + 1
+        WHERE carModName = :carModName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void addLikesByName(String carModName);
+
+    // 通过名称点赞数-1
+    @Query(value = """
+        UPDATE cars
+        SET likes = likes - 1
+        WHERE carModName = :carModName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void removeLikesByName(String carModName);
+
+    // 通过名称获取点赞数
+    @Query(value = """
+        SELECT cars.likes
+        FROM cars
+        WHERE cars.carModName = :carModName;
+        """, nativeQuery = true)
+    int getLikesByName(String carModName);
+
+    // 通过名称下载数+1
+    @Query(value = """
+        UPDATE cars
+        SET downloads = downloads + 1
+        WHERE carModName = :carModName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void addDownloadsByName(String carModName);
 }

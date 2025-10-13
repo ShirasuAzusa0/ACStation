@@ -1,5 +1,10 @@
 /* 统一在 :root 层级声明全局变量，后续在任何地方都能通过vue(xxx)进行引用 */
 :root {
+  --color-detail-bg: #efefef;
+  --color-setting-bg: #efefef;
+  --color-search-bg: #efefef;
+  --color-detail-text: #555;
+  --color-list-text: #666;
   /* header颜色变量 */
   /* logo文字颜色 */
   --color-primary: #755B8A;
@@ -21,4 +26,28 @@
   --footer-text: #ffffff;
   --footer-text-muted: #a8a8b3;
   --footer-px: clamp(0.75rem, 1vw, 1rem);   /* 随视口自适应 */
+}
+
+/* 暗色模式变量 */
+:root.dark {
+  --color-detail-bg: #8a8a8a;
+  --color-setting-bg: #676767;
+  --color-search-bg: #808080;
+  --color-detail-text: #ffffff;
+  --color-list-text: #000000;
+  /* header颜色变量 - 暗色模式 */
+  --color-primary: #9d7bc9;
+  --color-primary-hover: #b595e0;
+  --color-text: #e0e0e0;
+  --color-text-muted: #a0a0a0;
+  --color-bg: #3e3e43;
+  --color-border: #333333;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+
+  /* footer颜色变量 - 暗色模式 */
+  --footer-bg: #2e2e35;
+  --footer-border: #2a2a3a;
+  --footer-primary: #9d7bc9;
+  --footer-text: #e0e0e0;
+  --footer-text-muted: #888899;
 }

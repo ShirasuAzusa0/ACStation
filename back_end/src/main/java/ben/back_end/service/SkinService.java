@@ -42,4 +42,26 @@ public class SkinService {
     public Skins getSkinByName(String skinName) {
         return skinRepository.findSkinByName(skinName);
     }
+
+    // 通过名称更新数据
+    public void updateByName(String method, String type, String skinName) {
+        switch (type) {
+            case "views": skinRepository.updateViewsByName(skinName); break;
+            case "downloads": skinRepository.addDownloadsByName(skinName); break;
+            case "likes": {
+                if (method.equals("add")) skinRepository.addLikesByName(skinName);
+                else if(method.equals("remove")) skinRepository.removeLikesByName(skinName);
+                else throw new IllegalArgumentException("Invalid method");
+            }
+        }
+    }
+
+    // 通过名称获取更新字段数据
+    public int getUpdatedByName(String type, String skinName) {
+        return switch (type) {
+            case "views" -> skinRepository.getViewsByName(skinName);
+            case "likes" -> skinRepository.getLikesByName(skinName);
+            default -> -1;
+        };
+    }
 }

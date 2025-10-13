@@ -4,6 +4,9 @@
   import NavCards from '@/components/NavCards.vue'
   import Header from "@/components/Header.vue";
   import Footer from "@/components/Footer.vue";
+  import { useAlertStore } from "@/stores/alert.js";
+
+  const alertStore = useAlertStore();
 
   const navs = [
     {id: 1, name: "Videos", info: "Get faster in your hot lap", img: "/CardOutLook/VideoOutLook.jpg"},
@@ -94,6 +97,17 @@
 
 <template>
   <Header />
+  <!-- 全局提示框 -->
+  <transition name="fade">
+    <el-alert
+        v-if="alertStore.showAlert"
+        :title="alertStore.alertMessage"
+        :type="alertStore.alertType"
+        show-icon
+        effect="dark"
+        class="global-alert"
+    />
+  </transition>
   <main class="home">
     <!-- 核心区（hero区） -->
     <section class="hero">
@@ -248,6 +262,21 @@
 </template>
 
 <style scoped lang="scss">
+.global-alert {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: 600px;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
 .home {
   /* 根容器，让文字和按钮浮现在背景之上 */
   position: relative;

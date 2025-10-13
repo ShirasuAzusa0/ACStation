@@ -4,19 +4,15 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@Getter
 @Setter
-@Table(name = "tag_relationships")
-public class Tag_Relationships {
+@Getter
+@Entity
+@Table(name = "Images")
+public class Images {
     @Id
-    @ManyToOne
-    @JoinColumn(name = "tag_id", referencedColumnName = "tagId")
-    private Tags tags;
-
-    @ManyToOne
-    @JoinColumn(name = "video_id", referencedColumnName = "videoId")
-    private Videos videos;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "imgId")
+    private int imgId;
 
     @ManyToOne
     @JoinColumn(name = "skin_id", referencedColumnName = "skinId")
@@ -29,8 +25,4 @@ public class Tag_Relationships {
     @ManyToOne
     @JoinColumn(name = "track_id", referencedColumnName = "trackId")
     private Tracks tracks;
-
-    @ManyToOne
-    @JoinColumn(name = "plugin_id", referencedColumnName = "pluginId")
-    private Plugins plugins;
 }

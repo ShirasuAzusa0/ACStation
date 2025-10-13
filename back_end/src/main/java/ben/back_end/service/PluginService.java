@@ -1,5 +1,6 @@
 package ben.back_end.service;
 
+import ben.back_end.entity.Cars;
 import ben.back_end.entity.Plugins;
 import ben.back_end.repository.PluginRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +37,31 @@ public class PluginService {
     // 获取所有插件
     public Plugins getNewestPlugins() {
         return pluginRepository.findNewestPlugins();
+    }
+
+    // 通过名称获取车辆MOD
+    public Plugins getPluginByName(String pluginName) {
+        return pluginRepository.findPluginByName(pluginName);
+    }
+
+    // 通过名称更新数据
+    public void updateByName(String method, String type, String pluginName) {
+        switch (type) {
+            case "views": pluginRepository.updateViewsByName(pluginName); break;
+            case "likes": {
+                if (method.equals("add")) pluginRepository.addLikesByName(pluginName);
+                else if(method.equals("remove")) pluginRepository.removeLikesByName(pluginName);
+                else throw new IllegalArgumentException("Invalid method");
+            }
+        }
+    }
+
+    // 通过名称获取更新字段数据
+    public int getUpdatedByName(String type, String pluginName) {
+        return switch (type) {
+            case "views" -> pluginRepository.getViewsByName(pluginName);
+            case "likes" -> pluginRepository.getLikesByName(pluginName);
+            default -> -1;
+        };
     }
 }

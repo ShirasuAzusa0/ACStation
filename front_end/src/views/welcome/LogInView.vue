@@ -4,7 +4,7 @@ import {ref, onMounted} from 'vue'
 import {useRouter} from "vue-router"
 import axios from "axios"
 import {useUserStore} from '@/stores/user'
-import {ElMessage} from "element-plus";
+import {useAlertStore} from '@/stores/alert'
 
 const email = ref('')
 const password = ref('')
@@ -15,6 +15,7 @@ const captchaImage = ref('')
 const captchaKey = ref('')
 
 const userStore = useUserStore()
+const alertStore = useAlertStore()
 const router = useRouter()
 
 // 动态加载 JSEncrypt （用于PKCS#1 v1.5加密）
@@ -69,9 +70,11 @@ async function fetchCaptcha() {
       captchaKey.value = res.data.key
     } else {
       console.error('验证码接口返回异常：', res.data)
+      alertStore.showAlert("error", "网络异常，刷新验证码失败 ꒰ঌ(🎀 ᗜ`˰´ᗜ 🌸)໒꒱ ❌")
     }
   } catch (err) {
     console.error('获取验证码失败：', err)
+    alertStore.showAlert("error", "网络异常，刷新验证码失败 ꒰ঌ(🎀 ᗜ`˰´ᗜ 🌸)໒꒱ ❌")
   }
 }
 
@@ -91,16 +94,32 @@ const SignUp = async () => {
     await router.push("/Welcome/Sign-Up")
   } catch (err) {
     console.error('注册跳转流程异常：', err)
+    alertStore.showAlert("error", "网络异常，注册界面跳转失败 ꒰ঌ(🎀 ᗜ`˰´ᗜ 🌸)໒꒱ ❌")
   }
 }
 
 // 登录（发送account, password, captcha, captchaKey）
 const SignIn = async () => {
   try {
-    if (!email.value || !password.value) {
-      console.warn('账号或密码为空')
-      ElMessage.error('账号、用户名或密码为空')
+    if (!email.value) {
+      console.warn('邮箱账号为空')
+      alertStore.showAlertMessage("warning", "邮箱账号不能为空 ꒰ঌ(🎀 ᗜ`˰´ᗜ 🌸)໒꒱ ❌")
+      await router.push("/Welcome/Sign-In");
+      return;
     }
+    if (!password.value) {
+      console.warn('密码为空')
+      alertStore.showAlertMessage("warning", "密码不能为空 ꒰ঌ(🎀 ᗜ`˰´ᗜ 🌸)໒꒱ ❌")
+      await router.push("/Welcome/Sign-In");
+      return;
+    }
+    if (!captcha.value) {
+      console.warn("验证码为空")
+      alertStore.showAlertMessage("warning", "验证码不能为空 ꒰ঌ(🎀 ᗜ`˰´ᗜ 🌸)໒꒱ ❌")
+      await router.push("/Welcome/Sign-In");
+      return;
+    }
+
     // 加密密码
     const encryptedPassword = await encryptPassword(password.value)
 
@@ -117,14 +136,15 @@ const SignIn = async () => {
     if (res.data && (res.data.status === 'success' || res.status === '200')) {
       const d = res.data.data || {}
       userStore.setUser({username: d.username, userId: d.userId, avatar: d.avatar}, d.token)
+      alertStore.showAlertMessage("success", "登录成功，welcome to ACStation! ꒰ঌ(🎀 ᗜ`v´ᗜ 🌸)໒꒱ ✅")
       await router.push("/Home")
-      ElMessage.success('登录成功，welcome to ACStation!')
     } else {
       console.error('登录失败：', res.data)
-      ElMessage.error('登录失败')
+      alertStore.showAlertMessage("error", "网络异常，登录失败 ꒰ঌ(🎀 ᗜ`˰´ᗜ 🌸)໒꒱ ❌")
     }
   } catch (err) {
     console.error('登录流程异常：', err)
+    alertStore.showAlertMessage("error", "网络异常，登录失败 ꒰ঌ(🎀 ᗜ`˰´ᗜ 🌸)໒꒱ ❌")
   }
 }
 </script>

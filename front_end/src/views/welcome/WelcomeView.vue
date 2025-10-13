@@ -2,9 +2,23 @@
   import "@/styles/variables.scss"
   import "@/views/welcome/LogInView.vue"
   import "@/views/welcome/SignUpView.vue"
+  import { useAlertStore } from '@/stores/alert'
+
+  const alertStore = useAlertStore()
 </script>
 
 <template>
+  <!-- 全局提示框 -->
+  <transition name="fade">
+    <el-alert
+        v-if="alertStore.showAlert"
+        :title="alertStore.alertMessage"
+        :type="alertStore.alertType"
+        show-icon
+        effect="dark"
+        class="global-alert"
+    />
+  </transition>
   <div class="welcome">
     <div class="welcome__container">
       <div class="welcome__left">
@@ -26,6 +40,21 @@
 </template>
 
 <style scoped lang="scss">
+.global-alert {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: 400px;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
   .welcome {
     display: flex;
     flex-direction: column;

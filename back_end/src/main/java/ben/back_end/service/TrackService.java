@@ -42,4 +42,26 @@ public class TrackService {
     public Tracks getTrackByName(String trackName) {
         return trackRepository.findTrackByModName(trackName);
     }
+
+    // 通过名称更新数据
+    public void updateByName(String method, String type, String trackModName) {
+        switch (type) {
+            case "views": trackRepository.updateViewsByName(trackModName); break;
+            case "downloads": trackRepository.addDownloadsByName(trackModName); break;
+            case "likes": {
+                if (method.equals("add")) trackRepository.addLikesByName(trackModName);
+                else if(method.equals("remove")) trackRepository.removeLikesByName(trackModName);
+                else throw new IllegalArgumentException("Invalid method");
+            }
+        }
+    }
+
+    // 通过名称获取更新字段数据
+    public int getUpdatedByName(String type, String trackModName) {
+        return switch (type) {
+            case "views" -> trackRepository.getViewsByName(trackModName);
+            case "likes" -> trackRepository.getLikesByName(trackModName);
+            default -> -1;
+        };
+    }
 }

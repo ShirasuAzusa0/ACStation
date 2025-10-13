@@ -1,8 +1,10 @@
 package ben.back_end.repository;
 
 import ben.back_end.entity.Skins;
+import jakarta.transaction.Transactional;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -108,5 +110,69 @@ public interface SkinRepository extends JpaRepository<Skins, Integer> {
         WHERE skins.skinName = :skinName;
         """, nativeQuery = true)
     Skins findSkinByName(String skinName);
+
+    // 通过名称更新点击量
+    @Query(value = """
+        UPDATE skins
+        SET views = views + 1
+        WHERE skinName = :skinName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void updateViewsByName(String skinName);
+
+    // 通过名称获取点击量
+    @Query(value = """
+        SELECT skins.views
+        FROM skins
+        WHERE skins.skinName = :skinName;
+        """, nativeQuery = true)
+    int getViewsByName(String skinName);
+
+    // 通过名称点赞数+1
+    @Query(value = """
+        UPDATE skins
+        SET likes = likes + 1
+        WHERE skinName = :skinName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void addLikesByName(String skinName);
+
+    // 通过名称点赞数-1
+    @Query(value = """
+        UPDATE skins
+        SET likes = likes - 1
+        WHERE skinName = :skinName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void removeLikesByName(String skinName);
+
+    // 通过名称获取点赞数
+    @Query(value = """
+        SELECT skins.likes
+        FROM skins
+        WHERE skins.skinName = :skinName;
+        """, nativeQuery = true)
+    int getLikesByName(String skinName);
+
+    // 通过名称下载数+1
+    @Query(value = """
+        UPDATE skins
+        SET downloads = downloads + 1
+        WHERE skinName = :skinName;
+        """, nativeQuery = true)
+    // 告诉 Spring 这是修改操作
+    @Modifying
+    // 开启事务，否则无法执行更新
+    @Transactional
+    void addDownloadsByName(String skinName);
 }
 

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -16,4 +17,5 @@ public class TrackDetailsVO {
     private int downloads;
     private LocalDateTime createdAt;
     private String description;
+    private List<String> images;
 }

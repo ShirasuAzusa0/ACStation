@@ -289,6 +289,7 @@ onMounted( () => {
 .Skin {
   position: relative;
   margin: 0;
+  background: var(--color-setting-bg);
 
   &__container {
     display: flex;
@@ -322,7 +323,7 @@ onMounted( () => {
 .setting {
   width: 260px; /* 设定区宽度，可调 */
   transform: translate(0, 5%);
-  background: #f8f8f8;
+  background: var(--color-setting-bg);
   border-left: 1px solid #ddd;
   padding: 1rem;
   flex-shrink: 0;
@@ -405,7 +406,7 @@ onMounted( () => {
 /* search区 */
 .search {
   padding: 20px 40px;
-  background: #fff;
+  background: var(--color-search-bg);
   border-bottom: 1px solid #eee;
   animation: fadeInTop 0.5s ease-out 0.5s both;
 
@@ -422,6 +423,7 @@ onMounted( () => {
   padding: 20px 40px;
   background: #fafafa;
   animation: fadeInBottom 0.5s ease-out 0.5s both;
+  background: var(--color-detail-bg);
 
   &__inner {
     display: flex;
@@ -449,7 +451,7 @@ onMounted( () => {
       border: 1px solid #ddd;
       border-radius: 8px;
       padding: 0.5rem;
-      background: #fff;
+      background: var(--color-detail-bg);
       transition: transform 0.2s ease;
 
       &:hover {
@@ -482,7 +484,7 @@ onMounted( () => {
         gap: 10px 28px; /* 行间距、列间距可调 */
         padding: 0 10px 10px 10px;
         font-size: 0.85rem;
-        color: #666;
+        color: var(--color-list-text);
         text-align: center;
       }
     }

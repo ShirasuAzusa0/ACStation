@@ -1,4 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
+import SkinDetailView from "@/views/SourcePage/DetailPage/SkinDetailView.vue";
+import CarDetailView from "@/views/SourcePage/DetailPage/CarDetailView.vue";
+import TrackDetailView from "@/views/SourcePage/DetailPage/TrackDetailView.vue";
+import {useUserStore} from "@/stores/user.js";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,7 +68,26 @@ const router = createRouter({
             name: "videos",
             component: () => import('@/views/SourcePage/VideoView.vue'),
             children: []
+        },
+        {
+            path: "/Skins/:skinName",
+            name: "SkinDetail",
+            component: SkinDetailView,
+            props: true
+        },
+        {
+            path: "/Cars/:carModName",
+            name: "CarDetail",
+            component: CarDetailView,
+            props: true
+        },
+        {
+            path: "/Tracks/:trackModName",
+            name: "TrackDetail",
+            component: TrackDetailView,
+            props: true
         }
+
     ],
     scrollBehavior(to, from, savedPosition) {
         // 如果用户使用浏览器前进/后退，保留历史滚动位置
@@ -88,6 +111,7 @@ Vite dev server 有 URL 修正机制，会根据你的vue文件名命名方式�
 但有个例外，就是从其他页面直接指定跳转到小写开头的路径下，由于此过程不经过dev server文件名检查，小写开头的地址会原封不动地显示
  */
 
+// 路由守卫/全局拦截器
 // 保证用户手动输入小写也变成大写，确保路径显示统一
 router.beforeEach((to, from, next) => {
     // 首字母大写，其余保持原样
